@@ -1,0 +1,516 @@
+/*
+Copyright (C) 2020, 2021, 2022 Dethe Elza
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+@import url("https://rsms.me/inter/inter.css");
+html {
+  font-family: "Inter", sans-serif;
+}
+@supports (font-variation-settings: normal) {
+  html,
+  input,
+  label,
+  button,
+  select,
+  option {
+    font-family: "Inter var", sans-serif;
+  }
+}
+
+/* Variables */
+
+:root {
+  --bw: 4rem; /* button width */
+  --bh: 4rem; /* button-height */
+  --bw2: 2rem; /* half button width */
+  --bh2: 2rem; /* half button height */
+}
+
+/* Tools */
+
+html {
+  height: 100%;
+}
+
+html,
+body {
+  -webkit-overflow-scrolling: auto;
+}
+
+body {
+  height: 100vh;
+  font-size: 16px;
+}
+
+body.playing {
+  background-color: #000;
+  pointer-events: none;
+}
+
+body.storyboard {
+  background-color: #ccc;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  border-width: 0;
+  box-sizing: border-box;
+}
+
+button {
+  /* fix for iPad */
+  border-radius: 0;
+  border: 1px solid black;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+#jitter {
+  width: var(--bw);
+  height: var(--bh);
+}
+
+.toolbar > button {
+  border-width: 1px;
+  width: var(--bw);
+  height: var(--bh);
+}
+
+/* button i {
+  font-size: 2rem;
+}
+*/
+
+button label {
+  flex: 1;
+}
+
+#canvas {
+  position: absolute;
+}
+
+.playing svg {
+  background-color: white;
+}
+
+.storyboard svg {
+  display: none;
+}
+
+header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  min-height: var(--bh);
+  position: relative;
+  pointer-events: none;
+}
+
+header > * {
+  pointer-events: auto;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: var(--bh);
+}
+
+.noui .toolbar {
+  display: none;
+}
+
+.toolbar > *,
+.toolbar.active > [hidden] {
+  display: none !important;
+}
+
+.toolbar > .tab {
+  display: flex !important;
+}
+
+.toolbar.active > * {
+  display: flex !important;
+}
+
+.toolbar button.tab {
+  width: var(--bw2);
+}
+
+.tab span {
+  width: var(--bw);
+  transform: rotate(-90deg);
+}
+
+.stack {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  max-height: var(--bh);
+}
+
+.stack.colors {
+  min-width: var(--bw);
+}
+
+.stack.colors.quickcolors {
+  min-width: 8rem;
+  flex-wrap: wrap;
+}
+
+.stack.actions {
+  min-width: var(--bw);
+}
+
+.playing .toolbar,
+.storyboard .toolbar {
+  top: -6rem;
+}
+
+.feedback {
+  min-height: var(--bh);
+  max-height: var(--bh);
+  min-width: var(--bw);
+  font-size: 0.8rem;
+  background-color: white;
+  text-align: center;
+  display: flex;
+  border: 1px solid black;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.fa-stack-2x {
+  font-size: 2rem;
+}
+
+.field {
+  background-color: white;
+}
+
+.feedback label {
+  flex: 1;
+}
+
+input[type="text"] {
+  border: 2px inset #666;
+  margin: 2px;
+  padding: 4px 8px;
+  width: 10em;
+}
+
+input[type="checkbox"] {
+  display: none;
+}
+
+input[type="checkbox"] ~ .checked {
+  display: none;
+  font-size: 2rem;
+}
+
+input[type="checkbox"] ~ .unchecked {
+  display: block;
+  font-size: 2rem;
+}
+
+input[type="checkbox"]:checked ~ .checked {
+  display: block;
+}
+
+input[type="checkbox"]:checked ~ .unchecked {
+  display: none;
+}
+
+output {
+  /*   display: block; */
+}
+
+.palettechooser {
+  max-width: var(--bw);
+}
+
+.toolbar .miniwell {
+  flex: 0 0 var(--bh2);
+  width: var(--bw2);
+}
+
+.toolbar .colorwell {
+  flex: 0 0 var(--bh2);
+  max-width: var(--bw);
+}
+
+.toolbar .fgcolor {
+  background-color: black;
+  color: white;
+}
+
+.toolbar .bgcolor {
+  background-color: white;
+  color: black;
+}
+
+.toolbar .half {
+  min-height: var(--bh2);
+  max-height: var(--bh2);
+  max-width: var(-bw);
+}
+
+.active,
+.active .tab {
+  background-color: lightblue;
+}
+
+.colorpalette {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  height: var(--bh);
+  width: 8rem;
+}
+
+.popup-color {
+  position: absolute;
+  display: none;
+  background-color: rgb(225, 225, 225);
+  border: 1px solid rgb(191, 191, 191);
+  box-shadow: rgba(0, 0, 0, 0.24) 7px 7px 14px -3px;
+  border-radius: 4px;
+  padding: 12px;
+  box-sizing: content-box;
+  left: calc(50% - 100px);
+  top: calc(50% - 100px);
+  border-radius: 110px;
+  margin-left: -30px;
+  margin-top: -10px;
+}
+
+path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  fill: none;
+}
+
+.frame {
+  display: none;
+}
+
+.frame.selected {
+  display: inline;
+}
+.playing .frame.selected {
+  display: none;
+}
+
+.playing .frame.play-frame {
+  display: inline;
+}
+
+.frame.onionskin {
+  display: inline;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.storyboard-frame {
+  border: 1px solid #666;
+  padding: 10px;
+}
+
+.select-css.far,
+.select-css.far option {
+  font-family: "Font Awesome 5 Pro";
+  /*   font-weight: 900; */
+  font-size: 0.9rem;
+}
+
+button.primary {
+  width: var(--bw);
+  font-size: 0.8rem;
+  flex: 60%;
+  border-radius: 5px;
+  line-height: 1.2;
+}
+button.secondary {
+  width: var(--bw);
+  flex: 40%;
+  font-size: 0.5rem;
+  border-radius: 5px;
+  line-height: 1;
+}
+
+dialog {
+  width: 50%;
+}
+
+dialog p {
+  margin-bottom: 1rem;
+}
+
+dialog ul {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 600px;
+  justify-content: space-between;
+}
+
+dialog li {
+  list-style-type: none;
+  flex: 1 1 250px;
+}
+
+dialog .logo {
+  height: 4rem;
+}
+
+dialog form {
+  display: flex;
+  justify-content: flex-end;
+}
+
+dialog button {
+  padding: 1em;
+}
+
+dialog .close {
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 1rem;
+}
+
+.timeline {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  border: 2px solid black;
+  background-color: white;
+}
+
+.notimeline .timeline > div {
+  display: none;
+}
+
+.timeline-scroll {
+  overflow-x: scroll;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  background-color: #000;
+}
+
+.timeline label {
+  position: absolute;
+  display: block;
+  left: 3em;
+  bottom: 100%;
+  border: 1px solid #000;
+  border-bottom: 0;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  padding: 0.25em 0.5em;
+  background: #333;
+  color: #fff;
+}
+
+.timeline-frames {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  /* height: 70px; */
+  counter-reset: thumbCounter;
+}
+
+.timeline-frames canvas {
+  border: 0.5px solid #666;
+  border-radius: 2px;
+  margin-left: 3px;
+  background-color: #fff;
+}
+
+.timeline-frames canvas.selected {
+  outline: 3px solid blue;
+  border-radius: 4px;
+}
+
+.timeline-frames > div {
+  position: relative;
+  counter-increment: thumbCounter;
+}
+
+.timeline-frames > div::after {
+  content: counter(thumbCounter);
+  color: white;
+  background: green;
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  padding: 2px;
+  font-family: sans-serif;
+  pointer-events: none;
+}
+
+/* Moving  Mess popup styles here */
+#mess-messElement {
+  background-color: rgba(0, 0, 0, 0.8);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  bottom: 97px; /* FIXME: This is fragile, but should be above the Timeline widget */
+  color: #fff;
+  opacity: 0;
+  left: 50%;
+  padding: 0.5em;
+  position: absolute;
+  transform: translate(-50%, 0);
+  transition: opacity 0.5s linear;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+#mess-messElement button {
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+#mess-messElement.shown {
+  opacity: 1;
+}
+
+.notimeline #mess-messElement {
+  bottom: 4px; /* FIXME: This is fragile, but should be above the (collapsed) Timeline widget */
+}
+
+/* Spinner */
+
+#jitter i.spinning {
+  animation: 1s infinite spin;
+  animation-timing-function: linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

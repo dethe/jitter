@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2020, 2021, 2022 Dethe Elza
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>Jitter - Stop Motion Animation</title>
+    <link rel="manifest" href="/jitter/jitter.webmanifest" />
+    <link rel="icon" href="/jitter/favicon.ico" type="image/x-icon" />
+    <link href="/jitter/css/fontawesome.css?rel2" rel="stylesheet" />
+    <link href="/jitter/css/regular.css?rel2" rel="stylesheet" />
+    <link href="/jitter/css/solid.css?rel2" rel="stylesheet" />
+    <link href="/jitter/css/style.css?rel2" rel="stylesheet" />
+    <link href="/jitter/css/select-css.css?rel2" rel="stylesheet" />
+    <link href="/jitter/lib/dialog-polyfill.css?rel2" rel="stylesheet" />
+    <script src="/jitter/lib/dialog-polyfill.js" async defer></script>
+    <script type="module" src="/jitter/js/script.js" async defer></script>
+    <meta name="theme-color" content="#663399" />
+    <link rel="apple-touch-icon" href="/jitter/icons/icon0_192.png">
+  </head>
+  <body>
+    <header>
+      <button id="jitter" title="jitter">
+        <i class="far fa-palette fa-3x"></i>
+      </button>
+      <!-- Always visible, no toggle -->
+      <nav class="toolbar active" id="always">
+        <button id="about" type="button" title="About Jitter">
+          About<br />Jitter
+        </button>
+        <div class="feedback framecount">
+          <label>Frame</label>
+          <output>X of Y</output>
+        </div>
+        <button title="Frame Undo" id="frameundo" type="button"></button>
+        <button title="Frame Redo" id="frameredo" type="button"></button>
+      </nav>
+
+      <!-- FILE -->
+      <nav class="toolbar" id="file-toolbar">
+        <button id="file" title="File" type="button" class="js-tab tab">
+          <span>File</span>
+        </button>
+        <div class="feedback file">
+          <label for="filename">File name</label>
+          <input type="text" id="filename" />
+        </div>
+        <button id="filenew" type="button" title="New file">
+          New<br />
+          <i class="far fa-2x fa-file-alt"></i>
+        </button>
+        <button id="fileopen" type="button" title="Load file">
+          Load<br />
+          <i class="far fa-2x fa-upload"></i>
+        </button>
+        <button id="filesave" type="button" title="Save file">
+          Save<br />
+          <i class="far fa-2x fa-download"></i>
+        </button>
+        <button id="filegif" type="button" title="Save as GIF">
+          Save as GIF
+        </button>
+        <button id="filepng" type="button" title="Save as PNG">
+          Save as PNG
+        </button>
+        <button id="filezip" type="button" title="Save as ZIP">
+          Save as ZIP
+        </button>
+        <div class="feedback moat" id="moat-container">
+          <button id="save-moat" type="button" title="Save to Moat">
+            Save to Moat
+          </button>
+          <select id="moat" class="js-moat select-css"></select>
+        </div>
+      </nav>
+
+      <!-- DRAW -->
+      <nav class="toolbar active" id="draw-toolbar">
+        <button id="draw" title="Draw" type="button" class="js-tab tab">
+          <span>Draw</span>
+        </button>
+        <div class="feedback tools">
+          <label for="toolpicker"> Tool</label>
+          <select id="toolpicker" class="tools select-css far">
+            <option value="pen" selected>&#xf304; Pen</option>
+            <option value="rotate">&#xf021; Rotate</option>
+            <option value="move">&#xf047; Move</option>
+            <option value="zoomin">&#xf00e; Zoom In</option>
+            <option value="zoomout">&#xf010; Zoom Out</option>
+            <option value="eraser">&#xf12d; Eraser</option>
+          </select>
+        </div>
+        <div hidden class="feedback pensize">
+          <label class="pensize" for="pensize">Pen Size</label>
+          <input
+            id="pensize"
+            type="number"
+            min="1"
+            value="2"
+            title="Pen Size"
+          />
+        </div>
+        <div class="feedback erasersize">
+          <label class="erasersize" for="erasersize">Eraser Size</label>
+          <input
+            id="erasersize"
+            type="number"
+            min="1"
+            value="6"
+            title="Eraser Size"
+          />
+        </div>
+        <div class="feedback palette">
+          <label for="colorpalette"> Palette</label>
+          <select
+            id="colorpalette"
+            class="palettechooser js-colorpalette select-css"
+          ></select>
+        </div>
+        <div class="stack colors">
+          <button
+            title="Pen Colour"
+            type="button"
+            id="color"
+            value="#000000"
+            class="js-color fgcolor colorwell"
+          >
+            Color
+          </button>
+          <button
+            title="Background Color"
+            type="button"
+            value="#FFFFFF"
+            class="js-bgcolor colorwell bgcolor"
+            id="bgcolor"
+          >
+            Bkgrnd
+          </button>
+        </div>
+        <div class="stack colors quickcolors">
+          <button
+            id="color1"
+            type="button"
+            class="color miniwell js-miniwell"
+          ></button>
+          <button
+            id="color2"
+            type="button"
+            class="color miniwell js-miniwell"
+          ></button>
+          <button
+            id="color3"
+            type="button"
+            class="color miniwell js-miniwell"
+          ></button>
+          <button
+            id="color4"
+            type="button"
+            class="color miniwell js-miniwell"
+          ></button>
+          <button
+            id="color5"
+            type="button"
+            class="color miniwell js-miniwell"
+          ></button>
+          <button
+            id="color6"
+            type="button"
+            class="color miniwell"
+            value="#666666"
+            style="background-color: #666666"
+          ></button>
+          <button
+            id="color7"
+            type="button"
+            class="color miniwell"
+            value="#000000"
+            style="background-color: #000000"
+          ></button>
+          <button
+            id="color8"
+            class="color miniwell"
+            value="#FFFFFF"
+            style="background-color: #ffffff"
+          ></button>
+        </div>
+      </nav>
+
+      <!-- FRAMES -->
+      <nav class="toolbar" id="frames-toolbar">
+        <button id="frames" title="Frames" type="button" class="js-tab tab">
+          <span>Frames</span>
+        </button>
+        <button id="framedelete" title="Delete Frame" type="button" disabled>
+          Delete<br />
+          <span class="fa-stack">
+            <i class="fas fa-film-alt fa-stack-2x"></i>
+            <i class="far fa-minus fa-stack-1x fa-inverse"></i>
+          </span>
+        </button>
+        <button id="framenew" title="Add Frame" type="button">
+          Add<br />
+          <span class="fa-stack">
+            <i class="fas fa-film-alt fa-stack-2x"></i>
+            <i class="far fa-plus fa-stack-1x fa-inverse"></i>
+          </span>
+        </button>
+        <button id="framecopy" title="Copy Frame" type="button">
+          Copy<br />
+          <i class="far fa-photo-video fa-2x"></i>
+        </button>
+        <button id="frameclear" title="Clear" type="button">
+          Clear<br />
+          <i class="far fa-2x fa-sparkles"></i>
+        </button>
+        <button id="framefirst" title="First Frame" type="button">
+          First<br />
+          <i class="far fa-2x fa-fast-backward"></i>
+        </button>
+        <button id="frameprev" title="Previous Frame" type="button">
+          Back<br />
+          <i class="far fa-2x fa-step-backward"></i>
+        </button>
+        <button id="framenext" title="Next Frame" type="button">
+          Next<br />
+          <i class="far fa-2x fa-step-forward"></i>
+        </button>
+        <button id="framelast" title="Last Frame" type="button">
+          Last<br />
+          <i class="far fa-2x fa-fast-forward"></i>
+        </button>
+        <div class="feedback onionskin">
+          <label for="doonionskin"> Onionskin</label>
+          <input type="checkbox" checked id="doonionskin" />
+          <i class="unchecked far fa-square"></i>
+          <i class="checked far fa-check-square"></i>
+        </div>
+      </nav>
+      <!-- ANIMATE -->
+      <nav class="toolbar" id="animate-toolbar">
+        <button id="animate" title="Animate" type="button" class="js-tab tab">
+          <span>Animate</span>
+        </button>
+        <button id="animateplay" title="Play" type="button">
+          Play<br />
+          <i class="far fa-2x fa-play"></i>
+        </button>
+        <div class="feedback framerate">
+          <label title="Frames Per Second" for="framerate">FPS</label>
+          <input id="framerate" type="number" value="10" />
+        </div>
+      </nav>
+    </header>
+    <section class="timeline">
+      <label class="timeline-label">Timeline</label>
+      <div class="timeline-scroll">
+        <div class="timeline-frames"></div>
+      </div>
+    </section>
+    <div class="popup-color"></div>
+    <dialog id="aboutJitter">
+      <h3>About Jitter</h3>
+      <p>
+        Jitter is a simple stop motion animation tool. You can save your animations as
+        animated GIFs, PNGs containing all the frames, or a zipped folder of PNGs.
+      </p>
+      <p>
+        Jitter code is &copy; 2020,2021,2022 Dethe Elza.<br />
+        Individual works made with Jitter are owned by the individual
+        authors.<br />
+        Code libraries under <code>/lib</code> is external to Jitter and
+        copyrights/licenses are controlled by the authors of each such library.
+      </p>
+      <p>
+        Jitter code is open-source under the
+        <a rel="license" href="LICENSE">General Public License</a>.<br />
+        <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"
+          ><img
+            alt="Creative Commons License"
+            style="border-width: 0"
+            src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a
+        ><br />Jitter documentation, tutorials, and examples are licensed under
+        a
+        <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"
+          >Creative Commons Attribution 4.0 International License</a
+        >.
+      </p>
+      <form method="dialog">
+        <button id="shortcuts">Keyboard Shortcuts</button>
+        <input type="submit" class="close" value="Close" />
+      </form>
+    </dialog>
+    <dialog id="moat-dialog">
+      <div></div>
+      <form method="dialog">
+        <input type="submit" class="close" value="Close" />
+      </form>
+    </dialog>
+    <dialog id="shortcutsDialog">
+      <h3>Keyboard Shortcuts</h3>
+      <p>The following keyboard shortcuts are available.</p>
+      <ul>
+        <li><kbd>tab</kbd> Toggle UI</li>
+        <li><kbd>d</kbd> Toggle Storyboard view (in progress)</li>
+        <li><kbd>⌃+z/⌘+z</kbd> Undo (per-frame)</li>
+        <li><kbd>⌃+y/⇧+⌘+z</kbd> Redo (per-frame)</li>
+        <li><kbd>n</kbd> New File</li>
+        <li><kbd>⌃+s/⌘+s</kbd> Save File (as SVG)</li>
+        <li><kbd>⌃+o/⌘+o</kbd> Load File (from SVG)</li>
+        <li><kbd>g</kbd> Save as GIF</li>
+        <li><kbd>p</kbd> Save as PNG</li>
+        <li><kbd>⇧+1</kbd> Select Pen tool</li>
+        <li><kbd>⇧+2</kbd> Select Rotate tool</li>
+        <li><kbd>⇧+3</kbd> Select Move tool</li>
+        <li><kbd>⇧+4</kbd> Select Zoom In tool</li>
+        <li><kbd>⇧+5</kbd> Select Zoom Out tool</li>
+        <li><kbd>⇧+6</kbd> Select Eraser tool</li>
+        <li><kbd>+</kbd> Increase pen or eraser size</li>
+        <li><kbd>-</kbd> Decrease pen or eraser size</li>
+        <li><kbd>1-8</kbd> Change color to match palette #</li>
+        <li><kbd>⇧+n</kbd> Add new frame</li>
+        <li><kbd>⇧+⌦/⇧+⌫</kbd> Delete frame</li>
+        <li><kbd>⇧+c</kbd> Copy Frame</li>
+        <li><kbd>⇧+x</kbd> Clear Frame</li>
+        <li><kbd>⇧+←</kbd> First Frame</li>
+        <li><kbd>←</kbd> Prev Frame</li>
+        <li><kbd>→</kbd> Next Frame</li>
+        <li><kbd>⇧+→</kbd> Last Frame</li>
+        <li><kbd>k</kbd> Toggle Onionskin</li>
+        <li><kbd>r</kbd> Run animation</li>
+      </ul>
+      <form method="dialog">
+        <input type="submit" class="close" value="Close" />
+      </form>
+    </dialog>
+  </body>
+</html>
