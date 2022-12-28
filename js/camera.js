@@ -22,8 +22,8 @@ function initialize(id) {
 }
 
 function canvasSnapshot() {
-  const c = html("canvas", { width: video.width, height: video.height });
-  const ctx = c.getContext("2D");
+  const c = dom.html("canvas", { width: video.width, height: video.height });
+  const ctx = c.getContext("2d");
   ctx.drawImage(video, 0, 0);
   return c;
 }
@@ -33,7 +33,7 @@ function urlSnapshot() {
 }
 
 function htmlSnapshot() {
-  return html("img", {
+  return dom.html("img", {
     width: video.width,
     height: video.height,
     src: urlSnapshot(),
@@ -41,7 +41,7 @@ function htmlSnapshot() {
 }
 
 function svgSnapshot() {
-  return svg("image", {
+  return dom.svg("image", {
     width: video.width,
     height: video.height,
     href: urlSnapshot(),

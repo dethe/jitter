@@ -344,7 +344,7 @@ listen(document, "touchend", function (event) {
 });
 
 /* Initialize camera */
-camera.initialize('video');
+camera.initialize("video");
 
 /* Initialize Undo UI */
 const undoButtons = {
@@ -629,7 +629,10 @@ listen(window, "load", restoreLocal);
 listen(window, "resize", resize);
 
 // Frame events
-listen(document, "addFrame", evt => ui.currentFrame().appendChild(camera.svgSnapshot()));
+listen(document, "addFrame", evt => {
+  console.log("hear me out!");
+  ui.currentFrame().appendChild(camera.svgSnapshot());
+});
 listen(document, "addFrame", evt => timeline.addThumbnail(evt.detail.frame));
 listen(document, "removeFrame", evt =>
   timeline.removeThumbnail(evt.detail.frame)
