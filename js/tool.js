@@ -791,7 +791,7 @@ function getXY(evt) {
     evt.preventDefault();
   }
 
-  const rect = ui.canvas.getBoundingClientRect();
+  const rect = ui.doc.getBoundingClientRect();
   const position = (evt.changedTouches && evt.changedTouches[0]) || evt;
   let x = position.offsetX;
   let y = position.offsetY;

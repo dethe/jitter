@@ -23,18 +23,18 @@ function play() {
   // save style attribute of svg (for background color)
   let { x, y, width, height } = ui.getAnimationBBox();
   let onion = $(".onionskin");
-  _style = canvas.getAttribute("style");
+  _style = ui.doc.getAttribute("style");
   if (onion) {
     onion.classList.replace("onionskin", "nskin");
   }
   state.playing = true;
   document.body.classList.add("playing");
   $(".frame").classList.add("play-frame");
-  canvas.setAttribute("width", width + "px");
-  canvas.setAttribute("height", height + "px");
-  canvas.style.left = (document.body.clientWidth - width) / 2 + "px";
-  canvas.style.top = (document.body.clientHeight - height) / 2 + "px";
-  canvas.setAttribute("viewBox", [x, y, width, height].join(" "));
+  ui.doc.setAttribute("width", width + "px");
+  ui.doc.setAttribute("height", height + "px");
+  ui.doc.style.left = (document.body.clientWidth - width) / 2 + "px";
+  ui.doc.style.top = (document.body.clientHeight - height) / 2 + "px";
+  ui.doc.setAttribute("viewBox", [x, y, width, height].join(" "));
   // add SVG SMIL animation
   // Unless looping, call stop() when animation is finished
   // How much of this can I do by adding "playing" class to body?
@@ -57,10 +57,10 @@ function stop() {
   if (onion) {
     onion.classList.replace("nskin", "onionskin");
   }
-  canvas.removeAttribute("viewBox");
-  canvas.setAttribute("style", _style);
-  canvas.setAttribute("width", document.body.clientWidth + "px");
-  canvas.setAttribute("height", document.body.clientHeight + "px");
+  ui.doc.removeAttribute("viewBox");
+  ui.doc.setAttribute("style", _style);
+  ui.doc.setAttribute("width", document.body.clientWidth + "px");
+  ui.doc.setAttribute("height", document.body.clientHeight + "px");
 }
 
 function playNextFrame() {

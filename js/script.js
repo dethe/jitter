@@ -58,7 +58,7 @@ const addShortcuts = (shortcuts, fn, uxid, macHint, pcHint) =>
 window.ui = ui;
 window.state = state;
 
-const defaultCanvas = `<svg id="canvas" width="2560px" height="1116px" data-name="untitled" data-tool="pen" data-strokeWidth="2" data-doOnionskin="true" data-fps="10" data-palette="Primary" data-color="#000000" data-bgcolor="#FFFFFF" data-color1="#FF0000" data-color2="#FFFF00" data-color3="#00FF00" data-color4="#00FFFF" data-color5="#0000FF" data-color6="#666666" data-color7="#000000" data-color8="#FFFFFF" data-fileTab="false" data-drawTab="true" data-framesTab="true" data-animateTab="false"><g class="frame selected"></g></svg>`;
+const defaultDoc = `<svg id="doc" width="2560px" height="1116px" data-name="untitled" data-tool="pen" data-strokeWidth="2" data-doOnionskin="true" data-showVideo="true" data-fps="10" data-palette="Primary" data-color="#000000" data-bgcolor="#FFFFFF" data-color1="#FF0000" data-color2="#FFFF00" data-color3="#00FF00" data-color4="#00FFFF" data-color5="#0000FF" data-color6="#666666" data-color7="#000000" data-color8="#FFFFFF" data-fileTab="false" data-drawTab="true" data-framesTab="true" data-animateTab="false"><g class="frame selected"></g></svg>`;
 
 function getSvgPoint(x, y) {
   let point = $("svg").createSVGPoint();
@@ -95,40 +95,40 @@ const escCancel = evt => {
   }
 };
 
-listen(document, "changePen", evt => {
-  ui.tools.pen.setCursor(evt.detail.url, ui.currentTool === ui.tools.pen);
-});
+// listen(document, "changePen", evt => {
+//   ui.tools.pen.setCursor(evt.detail.url, ui.currentTool === ui.tools.pen);
+// });
 
-listen(document, "changeEraser", evt => {
-  ui.tools.eraser.setCursor(evt.detail.url, ui.currentTool === ui.tools.eraser);
-});
+// listen(document, "changeEraser", evt => {
+//   ui.tools.eraser.setCursor(evt.detail.url, ui.currentTool === ui.tools.eraser);
+// });
 
 let body = document.body;
 
-let toolStartOrHidePopup = evt => {
-  if (ui.isColorPopupVisible) {
-    ui.hideColorPopup();
-  } else {
-    toolStart(evt);
-  }
-};
+// let toolStartOrHidePopup = evt => {
+//   if (ui.isColorPopupVisible) {
+//     ui.hideColorPopup();
+//   } else {
+//     toolStart(evt);
+//   }
+// };
 
-function listenCanvas() {
-  listen(canvas, ["mousedown", "touchstart"], toolStartOrHidePopup);
-  listen(canvas, ["mousemove", "touchmove"], toolMove);
-  listen(canvas, "touchend", toolStop);
-  listen(canvas, "touchcancel", toolCancel);
+function listenDoc() {
+  // listen(ui.doc, ["mousedown", "touchstart"], toolStartOrHidePopup);
+  // listen(ui.doc, ["mousemove", "touchmove"], toolMove);
+  // listen(ui.doc, "touchend", toolStop);
+  // listen(ui.doc, "touchcancel", toolCancel);
 }
 
-listen(body, "mouseup", toolStop);
-listen(window, "keydown", escCancel);
+// listen(body, "mouseup", toolStop);
+// listen(window, "keydown", escCancel);
 
 listen(window, "updateFrame", evt =>
   timeline.updateThumbnail(evt.detail.frame)
 );
 
 function undoLine() {
-  dom.remove(ui.currentFrame().lastElementChild);
+  // dom.remove(ui.currentFrame().lastElementChild);
 }
 
 /* FILE Functions */
@@ -147,24 +147,27 @@ function newAnimation(evt) {
 
 function restoreFormat(savetext) {
   if (!savetext) {
-    savetext = defaultCanvas;
+    savetext = defaultDoc;
   }
-  ui.canvas.outerHTML = savetext;
-  ui.canvas = $("#canvas");
+  if (!ui.doc) {
+    ui.doc = dom.svg("svg");
+  }
+  ui.doc.outerHTML = savetext;
+  ui.doc = $("#doc");
   ui.updateFrameCount();
   dom.ensureIds(".frame");
   ui.resize();
   restoreSavedState();
-  listenCanvas();
+  listenDoc();
   timeline.makeThumbnails();
 }
 
 function restoreLocal() {
-  restoreFormat(localStorage._currentWork || defaultCanvas);
+  restoreFormat(localStorage._currentWork || defaultDoc);
 }
 
 function clear() {
-  restoreFormat(defaultCanvas);
+  restoreFormat(defaultDoc);
 }
 
 function saveToMoat() {
@@ -183,9 +186,12 @@ function saveToMoat() {
 }
 
 function saveFormat() {
-  if (ui.canvas) {
+  if (ui.doc) {
     updateSavedState();
-    return ui.canvas.outerHTML;
+    if (ui.doc.id === "canvas") {
+      ui.doc.id = "doc";
+    }
+    return ui.doc.outerHTML;
   } else {
     return "";
   }
@@ -287,11 +293,11 @@ function saveLocal() {
 }
 
 function updateSavedState() {
-  state.keys.forEach(key => (ui.canvas.dataset[key] = state[key]));
+  state.keys.forEach(key => (ui.doc.dataset[key] = state[key]));
 }
 
 function restoreSavedState() {
-  state.keys.forEach(key => (state[key] = ui.canvas.dataset[key]));
+  state.keys.forEach(key => (state[key] = ui.doc.dataset[key]));
 }
 
 function keydownHandler(evt) {
@@ -630,7 +636,6 @@ listen(window, "resize", resize);
 
 // Frame events
 listen(document, "addFrame", evt => {
-  console.log("hear me out!");
   ui.currentFrame().appendChild(camera.svgSnapshot());
 });
 listen(document, "addFrame", evt => timeline.addThumbnail(evt.detail.frame));

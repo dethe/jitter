@@ -141,13 +141,13 @@ function displayAsStoryboard() {
   let frames = ui.animationToImages();
   frames.forEach(f => document.body.appendChild(f));
   document.body.classList.add("storyboard");
-  ui.canvas.style.display = "none";
+  ui.doc.style.display = "none";
 }
 
 function displayAsDrawingboard() {
   $$(".storyboard-frame").map(f => f.remove());
   document.body.classList.remove("storyboard");
-  ui.canvas.style.display = "block";
+  ui.doc.style.display = "block";
 }
 
 let aboutJitterDialog = $("#aboutJitter");
@@ -253,7 +253,7 @@ function drawEraserToCanvas() {
 }
 
 class ui {
-  static canvas = $("#canvas");
+  static doc = $("#doc");
 
   static showAbout(timeout) {
     aboutJitterDialog.showModal();
@@ -393,8 +393,8 @@ class ui {
   static resize() {
     window.WIDTH = document.body.clientWidth;
     window.HEIGHT = document.body.clientHeight;
-    ui.canvas.setAttribute("width", window.WIDTH + "px");
-    ui.canvas.setAttribute("height", window.HEIGHT + "px");
+    ui.doc.setAttribute("width", window.WIDTH + "px");
+    ui.doc.setAttribute("height", window.HEIGHT + "px");
   }
 
   // Render state as needed
@@ -434,14 +434,15 @@ class ui {
   }
 
   static set showVideo(val) {
-    console.log("setting showVideo: %s", val);
     $("#doshowvideo").checked = val;
     let video = $("#video");
-    console.log(video);
+    let capture = $("#framenew");
     if (val) {
-      video.style.display = "";
+      video.removeAttribute("hidden");
+      capture.removeAttribute("hidden");
     } else {
-      video.style.display = "none";
+      video.setAttribute("hidden", "hidden");
+      capture.setAttribute("hidden", "hidden");
     }
   }
 
@@ -490,7 +491,7 @@ class ui {
 
   static set bgcolor(color) {
     colorButton($("#bgcolor"), color);
-    this.canvas.style.backgroundColor = color;
+    // this.doc.style.backgroundColor = color;
   }
 
   static set color1(color) {
@@ -542,17 +543,13 @@ class ui {
     }
   }
   static set animateTab(flag) {
-    if (flag) {
-      $("#animate-toolbar").classList.add("active");
-    } else {
-      $("#animate-toolbar").classList.remove("active");
-    }
+    // in process of removing this ribbon
   }
   static currentFrame() {
     let frame = $(".frame.selected");
     if (!frame) {
       frame = dom.svg("g", { class: "frame selected" });
-      canvas.insertBefore(frame, canvas.firstElementChild);
+      ui.doc.insertBefore(frame, ui.doc.firstElementChild);
     }
     return frame;
   }
@@ -569,19 +566,19 @@ class ui {
   static currentTool = null;
 }
 
-if (!ui.canvas) {
-  ui.canvas = dom.svg("svg");
-  ui.canvas.id = "canvas";
-  document.body.prepend(ui.canvas);
+if (!ui.doc) {
+  ui.doc = dom.svg("svg");
+  ui.doc.id = "doc";
+  document.body.prepend(ui.doc);
 }
 
 let tools = {
-  pen: new tool.Pen(ui.canvas),
-  move: new tool.Move(ui.canvas),
-  rotate: new tool.Rotate(ui.canvas),
-  zoomin: new tool.ZoomIn(ui.canvas),
-  zoomout: new tool.ZoomOut(ui.canvas),
-  eraser: new tool.Eraser(ui.canvas),
+  pen: new tool.Pen(ui.doc),
+  move: new tool.Move(ui.doc),
+  rotate: new tool.Rotate(ui.doc),
+  zoomin: new tool.ZoomIn(ui.doc),
+  zoomout: new tool.ZoomOut(ui.doc),
+  eraser: new tool.Eraser(ui.doc),
 };
 // FIXME move tools to script?
 ui.tools = tools;

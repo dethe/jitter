@@ -50,8 +50,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
           <label>Frame</label>
           <output>X of Y</output>
         </div>
-        <button title="Frame Undo" id="frameundo" type="button"></button>
-        <button title="Frame Redo" id="frameredo" type="button"></button>
+        <button title="Frame Undo" id="frameundo" hidden type="button"></button>
+        <button title="Frame Redo" id="frameredo" hidden type="button"></button>
       </nav>
 
       <!-- FILE -->
@@ -216,18 +216,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <i class="far fa-minus fa-stack-1x fa-inverse"></i>
           </span>
         </button>
-        <button id="framenew" title="Add Frame" type="button">
-          Add<br />
-          <span class="fa-stack">
-            <i class="fas fa-film-alt fa-stack-2x"></i>
-            <i class="far fa-plus fa-stack-1x fa-inverse"></i>
-          </span>
-        </button>
-        <button id="framecopy" title="Copy Frame" type="button">
+        <button id="framecopy" hidden title="Copy Frame" type="button">
           Copy<br />
           <i class="far fa-photo-video fa-2x"></i>
         </button>
-        <button id="frameclear" title="Clear" type="button">
+        <button id="frameclear" hidden title="Clear" type="button">
           Clear<br />
           <i class="far fa-2x fa-sparkles"></i>
         </button>
@@ -239,6 +232,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
           Back<br />
           <i class="far fa-2x fa-step-backward"></i>
         </button>
+        <button id="animateplay" title="Play" type="button">
+          Play<br />
+          <i class="far fa-2x fa-play"></i>
+        </button>
+        <button id="framenew" title="Capture" type="button">
+          Capture<br />
+          <span class="fa-stack">
+            <i class="fas fa-film-alt fa-stack-2x"></i>
+            <i class="far fa-plus fa-stack-1x fa-inverse"></i>
+          </span>
+        </button>
         <button id="framenext" title="Next Frame" type="button">
           Next<br />
           <i class="far fa-2x fa-step-forward"></i>
@@ -247,6 +251,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
           Last<br />
           <i class="far fa-2x fa-fast-forward"></i>
         </button>
+        <div class="feedback framerate">
+          <label title="Frames Per Second" for="framerate">FPS</label>
+          <input id="framerate" type="number" value="10" />
+        </div>
         <div class="feedback onionskin">
           <label for="doonionskin"> Onionskin</label>
           <input type="checkbox" checked id="doonionskin" />
@@ -254,24 +262,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
           <i class="checked far fa-check-square"></i>
         </div>
         <div class="feedback showvideo">
-          <label for="doshowvideo"> Show Video</label>
+          <label for="doshowvideo">Record</label>
           <input type="checkbox" checked id="doshowvideo" />
           <i class="unchecked far fa-square"></i>
           <i class="checked far fa-check-square"></i>
-        </div>
-      </nav>
-      <!-- ANIMATE -->
-      <nav class="toolbar" id="animate-toolbar">
-        <button id="animate" title="Animate" type="button" class="js-tab tab">
-          <span>Animate</span>
-        </button>
-        <button id="animateplay" title="Play" type="button">
-          Play<br />
-          <i class="far fa-2x fa-play"></i>
-        </button>
-        <div class="feedback framerate">
-          <label title="Frames Per Second" for="framerate">FPS</label>
-          <input id="framerate" type="number" value="10" />
         </div>
       </nav>
     </header>
@@ -334,19 +328,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <li><kbd>⌃+o/⌘+o</kbd> Load File (from SVG)</li>
         <li><kbd>g</kbd> Save as GIF</li>
         <li><kbd>p</kbd> Save as PNG</li>
-        <li><kbd>⇧+1</kbd> Select Pen tool</li>
-        <li><kbd>⇧+2</kbd> Select Rotate tool</li>
-        <li><kbd>⇧+3</kbd> Select Move tool</li>
-        <li><kbd>⇧+4</kbd> Select Zoom In tool</li>
-        <li><kbd>⇧+5</kbd> Select Zoom Out tool</li>
-        <li><kbd>⇧+6</kbd> Select Eraser tool</li>
-        <li><kbd>+</kbd> Increase pen or eraser size</li>
-        <li><kbd>-</kbd> Decrease pen or eraser size</li>
-        <li><kbd>1-8</kbd> Change color to match palette #</li>
-        <li><kbd>⇧+n</kbd> Add new frame</li>
+        <li><kbd>⇧+n</kbd> Capture new frame</li>
         <li><kbd>⇧+⌦/⇧+⌫</kbd> Delete frame</li>
         <li><kbd>⇧+c</kbd> Copy Frame</li>
-        <li><kbd>⇧+x</kbd> Clear Frame</li>
         <li><kbd>⇧+←</kbd> First Frame</li>
         <li><kbd>←</kbd> Prev Frame</li>
         <li><kbd>→</kbd> Next Frame</li>
