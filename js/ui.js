@@ -433,6 +433,18 @@ class ui {
     }
   }
 
+  static set showVideo(val) {
+    console.log("setting showVideo: %s", val);
+    $("#doshowvideo").checked = val;
+    let video = $("#video");
+    console.log(video);
+    if (val) {
+      video.style.display = "";
+    } else {
+      video.style.display = "none";
+    }
+  }
+
   static set fps(val) {
     $("#framerate").value = val;
   }

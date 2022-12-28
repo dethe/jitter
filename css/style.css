@@ -52,6 +52,10 @@ body {
 body {
   height: 100vh;
   font-size: 16px;
+  /* below 3 lines to center video, maybe temporary until I figure out video sizing and maybe switch to grid layout */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 body.playing {
@@ -119,7 +123,11 @@ header {
   flex-direction: row;
   flex-wrap: wrap;
   min-height: var(--bh);
-  position: relative;
+  /* position: relative */
+  /* next three lines are to cope with body switching to display:flex, see comment there */
+  position: absolute;
+  top: 0;
+  left: 0;
   pointer-events: none;
 }
 
@@ -139,6 +147,7 @@ header > * {
 }
 
 .toolbar > *,
+[hidden],
 .toolbar.active > [hidden] {
   display: none !important;
 }

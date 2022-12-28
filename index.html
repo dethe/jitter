@@ -34,7 +34,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <script src="/jitter/lib/dialog-polyfill.js" async defer></script>
     <script type="module" src="/jitter/js/script.js" async defer></script>
     <meta name="theme-color" content="#663399" />
-    <link rel="apple-touch-icon" href="/jitter/icons/icon0_192.png">
+    <link rel="apple-touch-icon" href="/jitter/icons/icon0_192.png" />
   </head>
   <body>
     <header>
@@ -93,7 +93,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       </nav>
 
       <!-- DRAW -->
-      <nav class="toolbar active" id="draw-toolbar">
+      <nav class="toolbar active" hidden id="draw-toolbar">
         <button id="draw" title="Draw" type="button" class="js-tab tab">
           <span>Draw</span>
         </button>
@@ -253,6 +253,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
           <i class="unchecked far fa-square"></i>
           <i class="checked far fa-check-square"></i>
         </div>
+        <div class="feedback showvideo">
+          <label for="doshowvideo"> Show Video</label>
+          <input type="checkbox" checked id="doshowvideo" />
+          <i class="unchecked far fa-square"></i>
+          <i class="checked far fa-check-square"></i>
+        </div>
       </nav>
       <!-- ANIMATE -->
       <nav class="toolbar" id="animate-toolbar">
@@ -279,8 +285,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <dialog id="aboutJitter">
       <h3>About Jitter</h3>
       <p>
-        Jitter is a simple stop motion animation tool. You can save your animations as
-        animated GIFs, PNGs containing all the frames, or a zipped folder of PNGs.
+        Jitter is a simple stop motion animation tool. You can save your
+        animations as animated GIFs, PNGs containing all the frames, or a zipped
+        folder of PNGs.
       </p>
       <p>
         Jitter code is &copy; 2020,2021,2022 Dethe Elza.<br />
@@ -351,5 +358,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <input type="submit" class="close" value="Close" />
       </form>
     </dialog>
+    <video id="video" width="640" height="480"></video>
   </body>
 </html>

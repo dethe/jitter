@@ -13,6 +13,7 @@ let values = {
   strokeWidth: 1,
   eraserWidth: 5,
   doOnionskin: true,
+  showVideo: true,
   fps: 10,
   _frameDelay: 100,
   palette: "Primary",
@@ -33,9 +34,13 @@ let values = {
   animateTab: false,
 };
 
-function toggleOnionSkin() {
-  state.doOnionskin = !state.doOnionskin;
-}
+// function toggleOnionSkin() {
+//   state.doOnionskin = !state.doOnionskin;
+// }
+
+// function toggleShowVideo(){
+//   state.showVideo = !state.showVideo;
+// }
 
 function bool(val) {
   if (val === "false") {
@@ -119,7 +124,23 @@ class state {
   }
 
   static toggleOnionskin() {
+    console.log("toggleOnionskin");
     values.doOnionskin = !values.doOnionskin;
+    values._dirty = true;
+  }
+
+  static get showVideo() {
+    return values.showVideo;
+  }
+
+  static set showVideo(val) {
+    values.showVideo = bool(val);
+    values._dirty = true;
+  }
+
+  static toggleShowVideo() {
+    console.log("toggleShowVideo");
+    values.showVideo = !values.showVideo;
     values._dirty = true;
   }
 

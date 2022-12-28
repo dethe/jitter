@@ -25,6 +25,7 @@ import * as animation from "/jitter/js/animation.js";
 import * as stepper from "/jitter/js/stepper.js";
 import * as undo from "/jitter/js/undo.js";
 import * as timeline from "/jitter/js/timeline.js";
+import * as camera from "/jitter/js/camera.js";
 import GIF from "/jitter/lib/gif.js";
 import JSZip from "/jitter/lib/jszip.min.js";
 
@@ -342,6 +343,9 @@ listen(document, "touchend", function (event) {
   lastTouchEnd = now;
 });
 
+/* Initialize camera */
+camera.initialize('video');
+
 /* Initialize Undo UI */
 const undoButtons = {
   frameUndo: $("#frameundo"),
@@ -604,6 +608,8 @@ listen("#framenext", "click", frames.incrementFrame);
 listen("#framelast", "click", frames.goToLastFrame);
 listen("#doonionskin", "change", state.toggleOnionskin);
 listen(".onionskin > i", "click", state.toggleOnionskin);
+listen("#doshowvideo", "change", state.toggleShowVideo);
+listen(".showvideo > i", "click", state.toggleShowVideo);
 listen("#animate", "click", evt => ui.toggleToolbar(evt.currentTarget.id));
 listen("#animateplay", "click", animation.play);
 listen("#framerate", "change", evt => (state.fps = evt.currentTarget.value));
@@ -623,6 +629,7 @@ listen(window, "load", restoreLocal);
 listen(window, "resize", resize);
 
 // Frame events
+listen(document, "addFrame", evt => ui.currentFrame().appendChild(camera.svgSnapshot()));
 listen(document, "addFrame", evt => timeline.addThumbnail(evt.detail.frame));
 listen(document, "removeFrame", evt =>
   timeline.removeThumbnail(evt.detail.frame)
