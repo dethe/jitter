@@ -28,7 +28,7 @@ class SVGCanvas {
     let lines = this.svg.querySelectorAll("path");
     lines.forEach(line => this.drawLine(line));
     let images = this.svg.querySelectorAll("image");
-    images.forEach(img => this.ctx.drawImage(img, 0, 0));
+    images.forEach(img => img.decode().then(this.ctx.drawImage(img, 0, 0)));
   }
 
   setTransforms() {

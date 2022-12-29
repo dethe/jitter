@@ -583,16 +583,12 @@ listen(
   "change",
   evt => (state.eraserWidth = Number(evt.currentTarget.value))
 );
-listen(
-  ".framerate .stepper-add-button",
-  "click",
-  evt => (state.frameRate += 1)
-);
-listen(
-  ".framerate .stepper-remove-button",
-  "click",
-  evt => (state.frameRate -= 1)
-);
+listen(".framerate .stepper-add-button", "click", evt => {
+  state.fps += 1;
+});
+listen(".framerate .stepper-remove-button", "click", evt => {
+  state.fps -= 1;
+});
 listen(
   "#framerate",
   "click",
@@ -601,13 +597,13 @@ listen(
 listen("#color, #bgcolor", "click", evt =>
   ui.showColorPopup(evt.currentTarget)
 );
-listen(".miniwell", "click", evt => ui.selectColor(evt.currentTarget));
-listen(".miniwell", "dblclick", evt => ui.showColorPopup(evt.currentTarget));
+// listen(".miniwell", "click", evt => ui.selectColor(evt.currentTarget));
+// listen(".miniwell", "dblclick", evt => ui.showColorPopup(evt.currentTarget));
 listen("#frames", "click", evt => ui.toggleToolbar(evt.currentTarget.id));
 listen("#framedelete", "click", evt => frames.deleteFrame());
 listen("#framenew", "click", frames.addFrame);
 listen("#framecopy", "click", () => frames.cloneFrame());
-listen("#frameclear", "click", () => frames.clearFrame());
+// listen("#frameclear", "click", () => frames.clearFrame());
 listen("#framefirst", "click", frames.goToFirstFrame);
 listen("#frameprev", "click", frames.decrementFrame);
 listen("#framenext", "click", frames.incrementFrame);
@@ -616,7 +612,7 @@ listen("#doonionskin", "change", state.toggleOnionskin);
 listen(".onionskin > i", "click", state.toggleOnionskin);
 listen("#doshowvideo", "change", state.toggleShowVideo);
 listen(".showvideo > i", "click", state.toggleShowVideo);
-listen("#animate", "click", evt => ui.toggleToolbar(evt.currentTarget.id));
+// listen("#animate", "click", evt => ui.toggleToolbar(evt.currentTarget.id));
 listen("#animateplay", "click", animation.play);
 listen("#framerate", "change", evt => (state.fps = evt.currentTarget.value));
 listen(".timeline-label", "click", timeline.toggleTimeline);
@@ -642,9 +638,9 @@ listen(document, "addFrame", evt => timeline.addThumbnail(evt.detail.frame));
 listen(document, "removeFrame", evt =>
   timeline.removeThumbnail(evt.detail.frame)
 );
-listen(document, "updateFrame", evt =>
-  timeline.updateThumbnail(evt.detail.frame)
-);
+// listen(document, "updateFrame", evt =>
+//   timeline.updateThumbnail(evt.detail.frame)
+// );
 listen(document, "selectFrame", evt =>
   timeline.selectThumbnail(evt.detail.frame)
 );

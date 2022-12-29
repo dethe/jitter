@@ -249,10 +249,6 @@ input[type="checkbox"]:checked ~ .unchecked {
   display: none;
 }
 
-output {
-  /*   display: block; */
-}
-
 .palettechooser {
   max-width: var(--bw);
 }
