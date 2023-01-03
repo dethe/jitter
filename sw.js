@@ -40,7 +40,6 @@ const appShellFiles = [
   "/jitter/js/script.js",
   "/jitter/js/state.js",
   "/jitter/js/stepper.js",
-  "/jitter/js/svgcanvas.js",
   "/jitter/js/timeline.js",
   "/jitter/js/ui.js",
   "/jitter/favicon/android-chrome-192x192.png",

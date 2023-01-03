@@ -17,7 +17,9 @@ import ui from "/jitter/js/ui.js";
 import { $, $$, html } from "/jitter/js/dom.js";
 
 function frameToThumbnail(frame) {
-  return ui.frameToImage(frame, 0, 0, WIDTH, HEIGHT, 64);
+  // this is different from Shimmy because Frames in Jitter contain an SVG <image> rather than
+  // an SVG <g> with child elements and transforms
+  return ui.frameToImage(frame, 64);
 }
 
 function thumbnailForFrame(frame) {
@@ -38,10 +40,13 @@ function makeThumbnails() {
   tl.innerHTML = ""; // remove any existing children
   $$(".frame").forEach(frame => {
     const thumb = frameToThumbnail(frame);
+    if (!thumb) return;
     tl.appendChild(html("div", [thumb]));
   });
-  tl.children[state.currentFrame].firstChild.classList.add("selected");
-  tl.children[state.currentFrame].firstChild.scrollIntoView();
+  if (tl.children.length) {
+    tl.children[state.currentFrame].firstChild.classList.add("selected");
+    tl.children[state.currentFrame].firstChild.scrollIntoView();
+  }
 }
 
 function updateThumbnail(frame) {

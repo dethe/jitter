@@ -137,6 +137,7 @@ function saveFormat() {
     if (ui.doc.id === "canvas") {
       ui.doc.id = "doc";
     }
+    $$(doc, 'g').forEach(g => {if (!g.hasChildNodes()){g.remove();}});
     return ui.doc.outerHTML;
   } else {
     return "";
@@ -152,13 +153,6 @@ function saveAsSvg(evt) {
   ui.startSpinner();
   dom.listen(document, "FileSaved", evt => ui.stopSpinner());
   file.save(saveFormat(), state.name);
-}
-
-function saveFrameAsPng(evt) {
-  // unused, add UI or delete
-  let { x, y, width, height } = ui.getAnimationBBox();
-  let img = frameToImage(ui.currentFrame(), x, y, width, height);
-  // FIXME: save the image
 }
 
 function saveAsGif(evt) {
@@ -194,7 +188,7 @@ function saveAsSpritesheet() {
   }
   if (!state.name) return;
   ui.startSpinner();
-  let { x, y, width, height } = ui.getAnimationBBox();
+  let { x, y, width, height } = ui.getAnimationBBox(); // FIXME, use img.height
   let frames = $$(".frame");
   let canvas = dom.html("canvas", {
     width: width,
@@ -202,7 +196,7 @@ function saveAsSpritesheet() {
   });
   let ctx = canvas.getContext("2d");
   frames.forEach((frame, idx) => {
-    ctx.drawImage(ui.frameToImage(frame, x, y, width, height), 0, height * idx);
+    ctx.drawImage(ui.frameToImage(frame), 0, height * idx);
   });
   dom.listen(document, "FileSaved", evt => ui.stopSpinner());
   file.saveAs(canvas, `${state.name}.png`);
@@ -224,7 +218,8 @@ async function saveAsZip() {
     const frame = frames[idx];
     // add each frame to the zip as a PNG
     let blob = await new Promise(resolve =>
-      ui.frameToImage(frame, x, y, width, height).toBlob(blob => resolve(blob))
+      // FIXME, frame contains an image already, use that?
+      ui.frameToImage(frame).toBlob(blob => resolve(blob))
     );
     img.file(state.name + pad(idx) + ".png", blob, { base64: true });
   }

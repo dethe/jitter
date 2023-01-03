@@ -1,8 +1,7 @@
 /* Functions specifically to manipulate the DOM go here */
 
 import * as dom from "/jitter/js/dom.js";
-const { $, $$, sendEvent } = dom;
-import SVGCanvas from "/jitter/js/svgcanvas.js";
+const { $, $$, html } = dom;
 import state from "/jitter/js/state.js";
 
 // polyfill for dialog
@@ -25,32 +24,6 @@ function displayAsDrawingboard() {
 
 let aboutJitterDialog = $("#aboutJitter");
 let shortcutsDialog = $("#shortcutsDialog");
-let currentDisplay = "drawingboard";
-
-let checkerboard;
-
-function initCheckerboard() {
-  checkerboard = dom.html("canvas", { width: 32, height: 32 });
-  const ctx = checkerboard.getContext("2d");
-  const width = 32;
-  const height = 32;
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = "white";
-  for (let x = 0; x < width / 2; x++) {
-    for (let y = 0; y < height / 2; y++) {
-      if (y % 2 === 0) {
-        if (x % 2 === 0) {
-          ctx.fillRect(x * 2, y * 2, 2, 2);
-        }
-      } else {
-        if (x % 2 !== 0) {
-          ctx.fillRect(x * 2, y * 2, 2, 2);
-        }
-      }
-    }
-  }
-}
 
 class ui {
   static doc = $("#doc");
@@ -101,15 +74,47 @@ class ui {
     state[`${name}Tab`] = !state[`${name}Tab`];
   }
 
-  static frameToImage(frame, x, y, width, height, maxHeight) {
-    return new SVGCanvas(frame, x, y, width, height, maxHeight).canvas;
+  static frameToImage(frame, targetHeight) {
+    console.log("frame: %o", frame);
+    let img = frame.querySelector("image");
+    if (!img) {
+      return null;
+    }
+    let targetWidth;
+    if (targetHeight) {
+      targetWidth = Math.floor(img.width / (img.height / targetHeight));
+      console.log("target width: %s", targetWidth);
+    } else {
+      targetHeight = img.height;
+      targetWidth = img.width;
+    }
+    let c = html("canvas", {
+      class: "canvas-frame ginger",
+      id: frame.id + "-canvas",
+      width: targetWidth,
+      height: targetHeight,
+    });
+    let ctx = c.getContext("2d");
+    img
+      .decode()
+      .then(() =>
+        ctx.drawImage(
+          img,
+          0,
+          0,
+          img.width,
+          img.height,
+          0,
+          0,
+          targetWidth,
+          targetHeight
+        )
+      );
+    return img;
   }
 
   static animationToImages() {
-    let { x, y, width, height } = this.getAnimationBBox();
-    return $$(".frame").map(frame =>
-      ui.frameToImage(frame, x, y, width, height)
-    );
+    return $$(".frame").map(frame => ui.frameToImage(frame));
   }
 
   static getBBox(frame) {
@@ -191,10 +196,10 @@ class ui {
   }
 
   static resize() {
-    window.WIDTH = document.body.clientWidth;
-    window.HEIGHT = document.body.clientHeight;
-    ui.doc.setAttribute("width", window.WIDTH + "px");
-    ui.doc.setAttribute("height", window.HEIGHT + "px");
+    window.WIDTH = 640;
+    window.HEIGHT = 480;
+    ui.doc.setAttribute("width", 640);
+    ui.doc.setAttribute("height", 480);
   }
 
   // Render state as needed
