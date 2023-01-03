@@ -23,7 +23,6 @@ import * as dom from "/jitter/js/dom.js";
 const { $, $$, sendEvent } = dom;
 import * as animation from "/jitter/js/animation.js";
 import * as stepper from "/jitter/js/stepper.js";
-import * as undo from "/jitter/js/undo.js";
 import * as timeline from "/jitter/js/timeline.js";
 import * as camera from "/jitter/js/camera.js";
 import GIF from "/jitter/lib/gif.js";
@@ -58,7 +57,7 @@ const addShortcuts = (shortcuts, fn, uxid, macHint, pcHint) =>
 window.ui = ui;
 window.state = state;
 
-const defaultDoc = `<svg id="doc" width="2560px" height="1116px" data-name="untitled" data-tool="pen" data-strokeWidth="2" data-doOnionskin="true" data-showVideo="true" data-fps="10" data-palette="Primary" data-color="#000000" data-bgcolor="#FFFFFF" data-color1="#FF0000" data-color2="#FFFF00" data-color3="#00FF00" data-color4="#00FFFF" data-color5="#0000FF" data-color6="#666666" data-color7="#000000" data-color8="#FFFFFF" data-fileTab="false" data-drawTab="true" data-framesTab="true" data-animateTab="false"><g class="frame selected"></g></svg>`;
+const defaultDoc = `<svg id="doc" width="2560px" height="1116px" data-name="untitled"data-doonionskin="true" data-showvideo="true" data-fps="10" data-fileTab="false" data-framesTab="true"><g class="frame selected"></g></svg>`;
 
 function getSvgPoint(x, y) {
   let point = $("svg").createSVGPoint();
@@ -67,14 +66,6 @@ function getSvgPoint(x, y) {
   return point;
 }
 
-function selectToolHandler(sel) {
-  state.tool = sel.value;
-  sel.blur();
-}
-
-// select the Pen tool if the color changes
-listen(document, "colorChanged", evt => (state.tool = "pen"));
-
 // Prevent control clicks from passing through to svg
 function swallowClicks(evt) {
   evt.stopPropagation();
@@ -82,54 +73,11 @@ function swallowClicks(evt) {
 }
 listen(".toolbar, .tabbar", ["mousedown", "touchstart"], swallowClicks);
 
-const toolStart = evt => ui.currentTool.start(evt);
-const toolMove = evt => ui.currentTool.move(evt);
-const toolStop = evt => ui.currentTool.stop(evt);
-const toolCancel = evt => ui.currentTool.cancel();
-const escCancel = evt => {
-  if (evt.code && evt.code === "Escape") {
-    ui.currentTool.cancel();
-    if (ui.isColorPopupVisible) {
-      ui.hideColorPopup();
-    }
-  }
-};
-
-// listen(document, "changePen", evt => {
-//   ui.tools.pen.setCursor(evt.detail.url, ui.currentTool === ui.tools.pen);
-// });
-
-// listen(document, "changeEraser", evt => {
-//   ui.tools.eraser.setCursor(evt.detail.url, ui.currentTool === ui.tools.eraser);
-// });
-
 let body = document.body;
-
-// let toolStartOrHidePopup = evt => {
-//   if (ui.isColorPopupVisible) {
-//     ui.hideColorPopup();
-//   } else {
-//     toolStart(evt);
-//   }
-// };
-
-function listenDoc() {
-  // listen(ui.doc, ["mousedown", "touchstart"], toolStartOrHidePopup);
-  // listen(ui.doc, ["mousemove", "touchmove"], toolMove);
-  // listen(ui.doc, "touchend", toolStop);
-  // listen(ui.doc, "touchcancel", toolCancel);
-}
-
-// listen(body, "mouseup", toolStop);
-// listen(window, "keydown", escCancel);
 
 listen(window, "updateFrame", evt =>
   timeline.updateThumbnail(evt.detail.frame)
 );
-
-function undoLine() {
-  // dom.remove(ui.currentFrame().lastElementChild);
-}
 
 /* FILE Functions */
 
@@ -140,7 +88,6 @@ function newAnimation(evt) {
   if (forSure) {
     clear();
     ui.updateFrameCount();
-    undo.clear();
     timeline.makeThumbnails();
   }
 }
@@ -158,7 +105,6 @@ function restoreFormat(savetext) {
   dom.ensureIds(".frame");
   ui.resize();
   restoreSavedState();
-  listenDoc();
   timeline.makeThumbnails();
 }
 
@@ -352,33 +298,6 @@ listen(document, "touchend", function (event) {
 /* Initialize camera */
 camera.initialize("video");
 
-/* Initialize Undo UI */
-const undoButtons = {
-  frameUndo: $("#frameundo"),
-  frameRedo: $("#frameredo"),
-};
-
-/* Show current undo options on buttons */
-function updateUndo(evt) {
-  ["frameUndo", "frameRedo"].forEach(key => {
-    if (evt.detail[key]) {
-      undoButtons[key].disabled = false;
-      undoButtons[key].innerText =
-        (key.endsWith("Undo") ? "Undo " : "Redo ") + evt.detail[key];
-    } else {
-      undoButtons[key].innerText = key.endsWith("Undo") ? "Undo" : "Redo";
-      undoButtons[key].disabled = true;
-    }
-  });
-  const frameCount = $$(".frame").length;
-  if (frameCount > 1) {
-    $("#framedelete").removeAttribute("disabled");
-  } else {
-    $("#framedelete").setAttribute("disabled", "disabled");
-  }
-}
-listen(document, "jitter-undo-change", updateUndo);
-
 // Show About dialogue the first time someone visits.
 if (!localStorage.hasSeenAbout) {
   ui.showAbout(3000);
@@ -398,22 +317,6 @@ function toggleVisible(element) {
 // keyboard shortcuts
 //
 //////////////////////////////////////////////////////////
-
-function changePenOrEraserSize(evt, handler) {
-  let key;
-  if (ui.currentTool.name === "pen") {
-    key = "strokeWidth";
-  } else if (ui.currentTool.name === "eraser") {
-    key = "eraserWidth";
-  } else {
-    return;
-  }
-  if (handler.shortcut.endsWith("-")) {
-    state[key] -= 1;
-  } else {
-    state[key] += 1;
-  }
-}
 
 function render() {
   if (state.dirty) {
@@ -440,21 +343,6 @@ requestAnimationFrame(render);
 
 addShortcuts("tab", () => $("#jitter").click(), "#jitter", "tab", "tab");
 addShortcuts("d", ui.toggleDisplay, "", "d", "d");
-// Undo/Redo
-addShortcuts(
-  "⌘+z, ctrl+z",
-  () => undo.undo(ui.currentFrame()),
-  "#frameundo",
-  "⌘-z",
-  "⌃-z"
-);
-addShortcuts(
-  "shift+⌘+z, ctrl+y",
-  () => undo.redo(ui.currentFrame()),
-  "#frameredo",
-  "⇧+⌘+z",
-  "⌃+y"
-);
 // Files
 addShortcuts("n", newAnimation, "#filenew", "n", "n");
 addShortcuts("⌘+s, ctrl+s", saveAsSvg, "#filesave", "⌘+s", "⌃+s");
@@ -462,54 +350,6 @@ addShortcuts("⌘+o, ctrl+o", openSvg, "#fileopen", "⌘+o", "⌃+o");
 addShortcuts("g", saveAsGif, "#filegif", "g", "g");
 addShortcuts("p", saveAsSpritesheet, "#filepng", "p", "p");
 addShortcuts("z", saveAsZip, "#filezip", "z", "z");
-// Tools
-addShortcuts("shift+1", () => (state.tool = "pen"), "#toolpen", "⇧+1", "⇧+1");
-addShortcuts(
-  "shift+2",
-  () => (state.tool = "rotate"),
-  "#toolrotate",
-  "⇧+2",
-  "⇧+2"
-);
-addShortcuts("shift+3", () => (state.tool = "move"), "#toolmove", "⇧+3", "⇧+3");
-addShortcuts(
-  "shift+4",
-  () => (state.tool = "zoomin"),
-  "#toolzoomin",
-  "⇧+4",
-  "⇧+4"
-);
-addShortcuts(
-  "shift+5",
-  () => (state.tool = "zoomout"),
-  "#toolzoomout",
-  "⇧+5",
-  "⇧+5"
-);
-addShortcuts(
-  "shift+6",
-  () => (state.tool = "eraser"),
-  "#tooleraser",
-  "⇧+6",
-  "⇧+6"
-);
-addShortcuts(
-  "shift+=, =, shift+-, -",
-  changePenOrEraserSize,
-  "#pensize,#erasersize",
-  "+/-",
-  "+/-"
-);
-// TODO: Add zoomin in/out without switching tools
-// colors
-addShortcuts("1", () => $("#color1").click(), "#color1", "1", "1");
-addShortcuts("2", () => $("#color2").click(), "#color2", "2", "2");
-addShortcuts("3", () => $("#color3").click(), "#color3", "3", "3");
-addShortcuts("4", () => $("#color4").click(), "#color4", "4", "4");
-addShortcuts("5", () => $("#color5").click(), "#color5", "5", "5");
-addShortcuts("6", () => $("#color6").click(), "#color6", "6", "6");
-addShortcuts("7", () => $("#color7").click(), "#color7", "7", "7");
-addShortcuts("8", () => $("#color8").click(), "#color8", "8", "8");
 // Frames
 addShortcuts("shift+n", frames.addFrame, "#framenew", "⇧+n", "⇧+n");
 addShortcuts(
@@ -521,14 +361,11 @@ addShortcuts(
   "⇧+⌫",
   "⇧+⌦"
 );
-addShortcuts("shift+c", () => frames.cloneFrame(), "#framecopy", "⇧+c", "⇧+c");
-addShortcuts("shift+x", () => frames.clearFrame(), "#frameclear", "⇧+x", "⇧+x");
 addShortcuts("shift+left", frames.goToFirstFrame, "#framefirst", "⇧+←", "⇧+←");
 addShortcuts("left", frames.decrementFrame, "#frameprev", "←", "←");
 addShortcuts("right", frames.incrementFrame, "#framenext", "→", "→");
 addShortcuts("shift+right", frames.goToLastFrame, "#framelast", "⇧+→", "⇧+→");
 addShortcuts("k", state.toggleOnionskin, "#doonionskin", "k", "k");
-// Animate
 addShortcuts("r", animation.play, "animateplay", "r", "r");
 
 // Promote number inputs to steppers
@@ -537,11 +374,8 @@ $$("input[type=number]").forEach(stepper.upgrade);
 // EVENT HANDLERS
 
 // UI Events
-listen(".palettechooser", "change", ui.setPaletteHandler);
 listen("#jitter", "click", ui.toggleUI);
 listen("#about", "click", ui.showAbout);
-listen("#frameundo", "click", evt => undo.undo(ui.currentFrame()));
-listen("#frameredo", "click", evt => undo.redo(ui.currentFrame()));
 listen("#file", "click", evt => ui.toggleToolbar(evt.currentTarget.id));
 listen("#filename", "change", evt => (state.name = $("#filename").value));
 listen("#filenew", "click", newAnimation);
@@ -551,38 +385,6 @@ listen("#filegif", "click", saveAsGif);
 listen("#filepng", "click", saveAsSpritesheet);
 listen("#filezip", "click", saveAsZip);
 listen("#save-moat", "click", saveToMoat);
-listen("#draw", "click", evt => ui.toggleToolbar(evt.currentTarget.id));
-listen("#toolpicker", "change", evt => selectToolHandler(evt.currentTarget));
-listen(
-  ".pensize .stepper-add-button",
-  "click",
-  evt => (state.strokeWidth += 1)
-);
-listen(
-  ".pensize .stepper-remove-button",
-  "click",
-  evt => (state.strokeWidth -= 1)
-);
-listen(
-  ".erasersize .stepper-add-button",
-  "click",
-  evt => (state.eraserWidth += 1)
-);
-listen(
-  ".erasersize .stepper-remove-button",
-  "click",
-  evt => (state.eraserWidth -= 1)
-);
-listen(
-  "#pensize",
-  "change",
-  evt => (state.strokeWidth = Number(evt.currentTarget.value))
-);
-listen(
-  "#erasersize",
-  "change",
-  evt => (state.eraserWidth = Number(evt.currentTarget.value))
-);
 listen(".framerate .stepper-add-button", "click", evt => {
   state.fps += 1;
 });
@@ -594,16 +396,9 @@ listen(
   "click",
   evt => (state.frameRate = Number(evt.currentTarget.value))
 );
-listen("#color, #bgcolor", "click", evt =>
-  ui.showColorPopup(evt.currentTarget)
-);
-// listen(".miniwell", "click", evt => ui.selectColor(evt.currentTarget));
-// listen(".miniwell", "dblclick", evt => ui.showColorPopup(evt.currentTarget));
 listen("#frames", "click", evt => ui.toggleToolbar(evt.currentTarget.id));
 listen("#framedelete", "click", evt => frames.deleteFrame());
 listen("#framenew", "click", frames.addFrame);
-listen("#framecopy", "click", () => frames.cloneFrame());
-// listen("#frameclear", "click", () => frames.clearFrame());
 listen("#framefirst", "click", frames.goToFirstFrame);
 listen("#frameprev", "click", frames.decrementFrame);
 listen("#framenext", "click", frames.incrementFrame);
@@ -612,7 +407,6 @@ listen("#doonionskin", "change", state.toggleOnionskin);
 listen(".onionskin > i", "click", state.toggleOnionskin);
 listen("#doshowvideo", "change", state.toggleShowVideo);
 listen(".showvideo > i", "click", state.toggleShowVideo);
-// listen("#animate", "click", evt => ui.toggleToolbar(evt.currentTarget.id));
 listen("#animateplay", "click", animation.play);
 listen("#framerate", "change", evt => (state.fps = evt.currentTarget.value));
 listen(".timeline-label", "click", timeline.toggleTimeline);
@@ -638,9 +432,6 @@ listen(document, "addFrame", evt => timeline.addThumbnail(evt.detail.frame));
 listen(document, "removeFrame", evt =>
   timeline.removeThumbnail(evt.detail.frame)
 );
-// listen(document, "updateFrame", evt =>
-//   timeline.updateThumbnail(evt.detail.frame)
-// );
 listen(document, "selectFrame", evt =>
   timeline.selectThumbnail(evt.detail.frame)
 );

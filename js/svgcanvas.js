@@ -1,5 +1,8 @@
 import * as dom from "/jitter/js/dom.js";
-import { radians } from "/jitter/js/tool.js";
+
+const DEG = 180 / Math.PI;
+const degrees = rads => rads * DEG;
+const radians = degs => degs / DEG;
 
 class SVGCanvas {
   constructor(frame, x, y, width, height, maxHeight) {
