@@ -1,5 +1,8 @@
 import * as dom from "/jitter/js/dom.js";
-import { radians } from "/jitter/js/tool.js";
+
+const DEG = 180 / Math.PI;
+const degrees = rads => rads * DEG;
+const radians = degs => degs / DEG;
 
 class SVGCanvas {
   constructor(frame, x, y, width, height, maxHeight) {
@@ -28,7 +31,7 @@ class SVGCanvas {
     let lines = this.svg.querySelectorAll("path");
     lines.forEach(line => this.drawLine(line));
     let images = this.svg.querySelectorAll("image");
-    images.forEach(img => this.ctx.drawImage(img, 0, 0));
+    images.forEach(img => img.decode().then(this.ctx.drawImage(img, 0, 0)));
   }
 
   setTransforms() {

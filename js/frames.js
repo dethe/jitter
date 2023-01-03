@@ -8,7 +8,6 @@ import state from "/jitter/js/state.js";
 import ui from "/jitter/js/ui.js";
 import * as dom from "/jitter/js/dom.js";
 const { $, $$ } = dom;
-import * as undo from "/jitter/js/undo.js";
 
 function updateOnionskin() {
   if (!state.doOnionskin) return;
@@ -19,7 +18,7 @@ function updateOnionskin() {
 function insertFrame(before, frame) {
   dom.insertAfter(frame, before);
   frame.id = dom.randomId();
-  dom.sendEvent("addFrame", {frame});
+  dom.sendEvent("addFrame", { frame });
   return frame;
 }
 
@@ -29,13 +28,7 @@ function addFrame() {
   goToFrame(curr, frame);
 }
 
-function cloneFrame() {
-  let curr = ui.currentFrame();
-  let frame = insertFrame(curr, curr.cloneNode(true));
-  goToFrame(curr, frame);
-}
-
-function deleteFrame(suppressUndo) {
+function deleteFrame() {
   let frameToDelete = ui.currentFrame();
   if (frameToDelete.nextElementSibling) {
     incrementFrame(true);
@@ -47,20 +40,7 @@ function deleteFrame(suppressUndo) {
   let next = frameToDelete.nextElementSibling;
   if (frameToDelete.parentNode.children.length > 1) {
     dom.remove(frameToDelete);
-    dom.sendEvent("removeFrame", {frame: frameToDelete});
-    if (!suppressUndo) {
-      undo.pushDocUndo(
-        "Delete Frame",
-        frameToDelete,
-        curr,
-        () => {
-          parent.insertBefore(frameToDelete, next);
-          dom.sendEvent("addFrame", {frame: frameToDelete});
-          goToFrame(curr, frameToDelete);
-        },
-        () => deleteFrame(true)
-      );
-    }
+    dom.sendEvent("removeFrame", { frame: frameToDelete });
     goToFrame(frameToDelete, curr);
   }
 }
@@ -70,7 +50,7 @@ function restore(frame, children, transform) {
     frame.setAttribute("transform", transform);
   }
   children.forEach(child => frame.appendChild(child));
-  dom.sendEvent("updateFrame", {frame});
+  dom.sendEvent("updateFrame", { frame });
   return frame;
 }
 
@@ -78,16 +58,8 @@ function clearFrame(frame) {
   if (!frame) {
     frame = ui.currentFrame();
   }
-  let oldTransform = frame.getAttribute("transform") || "";
-  let children = [...frame.children];
   dom.clear(frame);
-  dom.sendEvent("updateFrame", {frame});
-  undo.pushUndo(
-    "Clear",
-    frame,
-    () => restore(frame, children, oldTransform),
-    () => clearFrame(frame)
-  );
+  dom.sendEvent("updateFrame", { frame });
 }
 
 function goToFrame(prev, next) {
@@ -103,10 +75,9 @@ function goToFrame(prev, next) {
   }
   $$(".frame.selected").forEach(elem => elem.classList.remove("selected"));
   next.classList.add("selected");
-  dom.sendEvent("selectFrame", {frame:next});
+  dom.sendEvent("selectFrame", { frame: next });
   updateOnionskin();
   ui.updateFrameCount();
-  undo.update(next);
 }
 
 function incrementFrame() {
@@ -142,9 +113,7 @@ window.goToFrame = goToFrame;
 export {
   insertFrame,
   addFrame,
-  cloneFrame,
   deleteFrame,
-  clearFrame,
   goToFrame,
   incrementFrame,
   decrementFrame,

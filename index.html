@@ -50,8 +50,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
           <label>Frame</label>
           <output>X of Y</output>
         </div>
-        <button title="Frame Undo" id="frameundo" hidden type="button"></button>
-        <button title="Frame Redo" id="frameredo" hidden type="button"></button>
       </nav>
 
       <!-- FILE -->
@@ -92,118 +90,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </div>
       </nav>
 
-      <!-- DRAW -->
-      <nav class="toolbar active" hidden id="draw-toolbar">
-        <button id="draw" title="Draw" type="button" class="js-tab tab">
-          <span>Draw</span>
-        </button>
-        <div class="feedback tools">
-          <label for="toolpicker"> Tool</label>
-          <select id="toolpicker" class="tools select-css far">
-            <option value="pen" selected>&#xf304; Pen</option>
-            <option value="rotate">&#xf021; Rotate</option>
-            <option value="move">&#xf047; Move</option>
-            <option value="zoomin">&#xf00e; Zoom In</option>
-            <option value="zoomout">&#xf010; Zoom Out</option>
-            <option value="eraser">&#xf12d; Eraser</option>
-          </select>
-        </div>
-        <div hidden class="feedback pensize">
-          <label class="pensize" for="pensize">Pen Size</label>
-          <input
-            id="pensize"
-            type="number"
-            min="1"
-            value="2"
-            title="Pen Size"
-          />
-        </div>
-        <div class="feedback erasersize">
-          <label class="erasersize" for="erasersize">Eraser Size</label>
-          <input
-            id="erasersize"
-            type="number"
-            min="1"
-            value="6"
-            title="Eraser Size"
-          />
-        </div>
-        <div class="feedback palette">
-          <label for="colorpalette"> Palette</label>
-          <select
-            id="colorpalette"
-            class="palettechooser js-colorpalette select-css"
-          ></select>
-        </div>
-        <div class="stack colors">
-          <button
-            title="Pen Colour"
-            type="button"
-            id="color"
-            value="#000000"
-            class="js-color fgcolor colorwell"
-          >
-            Color
-          </button>
-          <button
-            title="Background Color"
-            type="button"
-            value="#FFFFFF"
-            class="js-bgcolor colorwell bgcolor"
-            id="bgcolor"
-          >
-            Bkgrnd
-          </button>
-        </div>
-        <div class="stack colors quickcolors">
-          <button
-            id="color1"
-            type="button"
-            class="color miniwell js-miniwell"
-          ></button>
-          <button
-            id="color2"
-            type="button"
-            class="color miniwell js-miniwell"
-          ></button>
-          <button
-            id="color3"
-            type="button"
-            class="color miniwell js-miniwell"
-          ></button>
-          <button
-            id="color4"
-            type="button"
-            class="color miniwell js-miniwell"
-          ></button>
-          <button
-            id="color5"
-            type="button"
-            class="color miniwell js-miniwell"
-          ></button>
-          <button
-            id="color6"
-            type="button"
-            class="color miniwell"
-            value="#666666"
-            style="background-color: #666666"
-          ></button>
-          <button
-            id="color7"
-            type="button"
-            class="color miniwell"
-            value="#000000"
-            style="background-color: #000000"
-          ></button>
-          <button
-            id="color8"
-            class="color miniwell"
-            value="#FFFFFF"
-            style="background-color: #ffffff"
-          ></button>
-        </div>
-      </nav>
-
       <!-- FRAMES -->
       <nav class="toolbar" id="frames-toolbar">
         <button id="frames" title="Frames" type="button" class="js-tab tab">
@@ -215,14 +101,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <i class="fas fa-film-alt fa-stack-2x"></i>
             <i class="far fa-minus fa-stack-1x fa-inverse"></i>
           </span>
-        </button>
-        <button id="framecopy" hidden title="Copy Frame" type="button">
-          Copy<br />
-          <i class="far fa-photo-video fa-2x"></i>
-        </button>
-        <button id="frameclear" hidden title="Clear" type="button">
-          Clear<br />
-          <i class="far fa-2x fa-sparkles"></i>
         </button>
         <button id="framefirst" title="First Frame" type="button">
           First<br />
