@@ -28,6 +28,10 @@ function thumbnailForFrame(frame) {
     return null;
   }
   let thumb = $(`#${frame.id}-canvas`);
+  if (!thumb) {
+    thumb = frameToThumbnail(frame);
+  }
+
   return thumb;
 }
 
@@ -35,12 +39,20 @@ function frameForThumbnail(thumb) {
   return $(`#${thumb.id.split("-")[0]}`);
 }
 
+function clearThumbnails() {
+  const tl = $(".timeline-frames");
+  tl.innerHTML = ""; // remove any existing children
+}
+
 function makeThumbnails() {
   const tl = $(".timeline-frames");
   tl.innerHTML = ""; // remove any existing children
   $$(".frame").forEach(frame => {
     const thumb = frameToThumbnail(frame);
-    if (!thumb) return;
+    if (!thumb) {
+      console.error("No thumb for frame %s", frame.id);
+      return;
+    }
     tl.appendChild(html("div", [thumb]));
   });
   if (tl.children.length) {
@@ -64,6 +76,11 @@ function addThumbnail(frame) {
   const oldThumb = oldFrame
     ? thumbnailForFrame(frame.nextElementSibling).parentNode
     : null;
+  const newThumbImage = frameToThumbnail(frame);
+  if (!newThumbImage) {
+    console.error("No image from frameToThumbnail for frame %o", frame);
+    return;
+  }
   const newThumb = html("div", [frameToThumbnail(frame)]);
   $(".timeline-frames").insertBefore(newThumb, oldThumb);
   newThumb.scrollIntoView();
@@ -82,6 +99,10 @@ function selectThumbnail(frame) {
     thumb.classList.remove("selected")
   );
   let nextThumb = thumbnailForFrame(frame);
+  if (!nextThumb) {
+    console.error("No thumbnail returned for frame %s", frame.id);
+    return;
+  }
   nextThumb.classList.add("selected");
   nextThumb.scrollIntoView();
 }
@@ -90,6 +111,7 @@ export {
   frameToThumbnail,
   frameForThumbnail,
   thumbnailForFrame,
+  clearThumbnails,
   makeThumbnails,
   updateThumbnail,
   addThumbnail,

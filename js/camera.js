@@ -9,6 +9,7 @@ function initialize(id) {
   navigator.mediaDevices
     .getUserMedia({ video: true })
     .then(mediaStream => {
+      // console.log('initializing camera for "%s"', id);
       video = document.querySelector("#" + id);
       video.srcObject = mediaStream;
       video.onloadedmetadata = () => {

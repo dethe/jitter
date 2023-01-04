@@ -71,22 +71,37 @@ class ui {
   }
 
   static toggleToolbar(name) {
-    state[`${name}Tab`] = !state[`${name}Tab`];
+    state[`${name}tab`] = !state[`${name}tab`];
   }
 
   static frameToImage(frame, targetHeight) {
-    console.log("frame: %o", frame);
+    // if there is no targetHeight, could just create an HTML <img> and set it's src to the href of <image>
+    // console.log("frame %s: %s child nodes", frame.id, frame.children.length);
     let img = frame.querySelector("image");
     if (!img) {
+      console.error("No image for frame %s", frame.id);
       return null;
     }
     let targetWidth;
+    // SVG images width/height are animatable properties
+    let imgWidth = img.width.baseVal.value;
+    let imgHeight = img.height.baseVal.value;
     if (targetHeight) {
-      targetWidth = Math.floor(img.width / (img.height / targetHeight));
-      console.log("target width: %s", targetWidth);
+      targetWidth = Math.floor(imgWidth / (imgHeight / targetHeight));
+      // console.log(
+      //   "target height: %s, target width: %s, img: %o",
+      //   targetHeight,
+      //   targetWidth,
+      //   img
+      // );
     } else {
-      targetHeight = img.height;
-      targetWidth = img.width;
+      return dom.html("img", {
+        width: imgWidth,
+        height: imgHeight,
+        src: img.getAttribute("href"),
+      });
+      targetHeight = imgHeight;
+      targetWidth = imgWidth;
     }
     let c = html("canvas", {
       class: "canvas-frame ginger",
@@ -102,15 +117,15 @@ class ui {
           img,
           0,
           0,
-          img.width,
-          img.height,
+          imgWidth,
+          imgHeight,
           0,
           0,
           targetWidth,
           targetHeight
         )
       );
-    return img;
+    return c;
   }
 
   static animationToImages() {
@@ -187,15 +202,26 @@ class ui {
   static updateFrameCount() {
     try {
       let frames = $$(".frame");
-      let index = frames.indexOf(this.currentFrame());
-      state.currentFrame = index; // 0-based index for both frames and timeline thumbnails
-      $(".framecount output").textContent = index + 1 + " of " + frames.length;
+      if (frames.length) {
+        let index = frames.indexOf(this.currentFrame());
+        // FIXME, this does not belong in state, is only used to communicate with timeline
+        if (index < 0) {
+          index = 0;
+        }
+        state.currentFrame = index; // 0-based index for both frames and timeline thumbnails
+        $(".framecount output").textContent =
+          index + 1 + " of " + frames.length;
+      } else {
+        $(".framecount output").textContent = "0 of 0";
+      }
     } catch (e) {
+      console.warn("Exception %o in updateFrameCount", e);
       // wait for the file to load, probably
     }
   }
 
   static resize() {
+    // Fixme, these should not be hard-coded
     window.WIDTH = 640;
     window.HEIGHT = 480;
     ui.doc.setAttribute("width", 640);
@@ -236,7 +262,7 @@ class ui {
     $("#framerate").value = val;
   }
 
-  static set fileTab(flag) {
+  static set filetab(flag) {
     if (flag) {
       $("#file-toolbar").classList.add("active");
     } else {
@@ -244,7 +270,8 @@ class ui {
     }
   }
 
-  static set framesTab(flag) {
+  static set framestab(flag) {
+    // console.log("frame ribbon should be %s", flag ? "on" : "off");
     if (flag) {
       $("#frames-toolbar").classList.add("active");
     } else {
@@ -253,12 +280,17 @@ class ui {
   }
 
   static currentFrame() {
+    // Unlike Shimmy, we can have 0 frames, don't create a default frame
     let frame = $(".frame.selected");
-    if (!frame) {
-      frame = dom.svg("g", { class: "frame selected" });
-      ui.doc.insertBefore(frame, ui.doc.firstElementChild);
+    if (frame) {
+      return frame;
     }
-    return frame;
+    let frames = $$(".frame");
+    if (frames.length) {
+      frames[0].classList.add("selected");
+      return frames[0];
+    }
+    return null;
   }
 
   static currentOnionskinFrame() {
@@ -267,7 +299,7 @@ class ui {
 }
 
 if (!ui.doc) {
-  console.log("initialize svg");
+  // console.log("initialize svg");
   ui.doc = dom.svg("svg");
   ui.doc.id = "doc";
   document.body.prepend(ui.doc);

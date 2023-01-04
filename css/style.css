@@ -440,6 +440,7 @@ dialog .close {
   display: flex;
   flex-wrap: nowrap;
   flex-direction: row;
+  min-height: 64px;
   /* height: 70px; */
   counter-reset: thumbCounter;
 }
@@ -451,7 +452,7 @@ dialog .close {
   background-color: #fff;
 }
 
-.timeline-frames canvas.selected {
+.timeline-frames .selected {
   outline: 3px solid blue;
   border-radius: 4px;
 }
@@ -473,36 +474,6 @@ dialog .close {
   pointer-events: none;
 }
 
-/* Moving  Mess popup styles here */
-#mess-messElement {
-  background-color: rgba(0, 0, 0, 0.8);
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  bottom: 97px; /* FIXME: This is fragile, but should be above the Timeline widget */
-  color: #fff;
-  opacity: 0;
-  left: 50%;
-  padding: 0.5em;
-  position: absolute;
-  transform: translate(-50%, 0);
-  transition: opacity 0.5s linear;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-}
-
-#mess-messElement button {
-  padding: 5px 10px;
-  border-radius: 5px;
-}
-
-#mess-messElement.shown {
-  opacity: 1;
-}
-
-.notimeline #mess-messElement {
-  bottom: 4px; /* FIXME: This is fragile, but should be above the (collapsed) Timeline widget */
-}
 
 /* Spinner */
 

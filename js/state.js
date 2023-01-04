@@ -12,17 +12,9 @@ let values = {
   fps: 10,
   _frameDelay: 100,
   display: "drawingboard",
-  fileTab: false,
-  framesTab: true,
+  filetab: false,
+  framestab: true,
 };
-
-// function toggleOnionSkin() {
-//   state.doOnionskin = !state.doOnionskin;
-// }
-
-// function toggleShowVideo(){
-//   state.showVideo = !state.showVideo;
-// }
 
 function bool(val) {
   if (val === "false") {
@@ -87,7 +79,7 @@ class state {
     values._dirty = true;
   }
 
-  static toggleShowvideo() {
+  static toggleshowvideo() {
     values.showvideo = !values.showvideo;
     values._dirty = true;
   }
@@ -110,21 +102,21 @@ class state {
     return values._frameDelay;
   }
 
-  static get fileTab() {
-    return values.fileTab;
+  static get filetab() {
+    return values.filetab;
   }
 
-  static set fileTab(val) {
-    values.fileTab = bool(val);
+  static set filetab(val) {
+    values.filetab = bool(val);
     values._dirty = true;
   }
 
-  static get framesTab() {
-    return values.framesTab;
+  static get framestab() {
+    return values.framestab;
   }
 
-  static set framesTab(val) {
-    values.framesTab = bool(val);
+  static set framestab(val) {
+    values.framestab = bool(val);
     values._dirty = true;
   }
 }
