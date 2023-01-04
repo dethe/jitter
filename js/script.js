@@ -102,6 +102,8 @@ function restoreFormat(savetext) {
 
 function restoreLocal() {
   restoreFormat(localStorage._currentWork || defaultDoc);
+  state._dirty = true; // a dirty hack to get onionskinning running on restart
+  requestAnimationFrame(render);
 }
 
 function clear() {
@@ -162,11 +164,15 @@ function saveAsGif(evt) {
     quality: 10,
     workerScript: "lib/gif.worker.js",
     background: "#FFFFFF",
+    width: 640, // FIXME
+    height: 480,
   });
-  let images = ui.animationToImages().map(i => i.decode());
-  Promise.all(images).then(imgs =>
-    imgs.forEach(img => gif.addFrame(img, { delay: state.frameDelay }))
-  );
+  let images = ui.animationToImages();
+  // console.log("images in saveAsGif: %o", images);
+  Promise.all(images.map(i => i.decode())).then(() => {
+    images.forEach(img => gif.addFrame(img, { delay: state.frameDelay }));
+    gif.render();
+  });
   // images.forEach(img => gif.addFrame(img, { delay: state.frameDelay }));
   gif.on("finished", function (blob) {
     console.info("gif completed");
@@ -174,7 +180,6 @@ function saveAsGif(evt) {
     // window.open(URL.createObjectURL(blob));
   });
   dom.listen(document, "FileSaved", evt => ui.stopSpinner());
-  gif.render();
 }
 
 function openSvg(evt) {
@@ -196,15 +201,17 @@ function saveAsSpritesheet() {
     height: height * frames.length,
   });
   let ctx = canvas.getContext("2d");
-  Promise.all(frames.map(f => ui.frameToImage(f).decode())).then(images =>
-    images.forEach((img, idx) => ctx.drawImage(img, 0, height * idx))
-  );
+  let images = frames.map(f => ui.frameToImage(f));
+  console.log("images in saveAsSpritesheet: %o", images);
+  Promise.all(images.map(i => i.decode())).then(() => {
+    images.forEach((img, idx) => ctx.drawImage(img, 0, height * idx));
+    file.saveAs(canvas, `${state.name}.png`);
+  });
   // frames.forEach((frame, idx) => {
   //   let img = ui.frameToImage(frame);
   //   img.decode().then(() => ctx.drawImage(img, 0, height * idx));
   // });
   dom.listen(document, "FileSaved", evt => ui.stopSpinner());
-  file.saveAs(canvas, `${state.name}.png`);
 }
 
 async function saveAsZip() {
@@ -334,8 +341,6 @@ function resize() {
   ui.resize();
   timeline.makeThumbnails();
 }
-
-requestAnimationFrame(render);
 
 // Key shortcuts: Command: ⌘
 //                Control: ⌃
