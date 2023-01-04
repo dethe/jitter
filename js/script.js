@@ -102,6 +102,8 @@ function restoreFormat(savetext) {
 
 function restoreLocal() {
   restoreFormat(localStorage._currentWork || defaultDoc);
+  state._dirty = true; // a dirty hack to get onionskinning running on restart
+  requestAnimationFrame(render);
 }
 
 function clear() {
@@ -162,16 +164,22 @@ function saveAsGif(evt) {
     quality: 10,
     workerScript: "lib/gif.worker.js",
     background: "#FFFFFF",
+    width: 640, // FIXME
+    height: 480,
   });
   let images = ui.animationToImages();
-  images.forEach(img => gif.addFrame(img, { delay: state.frameDelay }));
+  // console.log("images in saveAsGif: %o", images);
+  Promise.all(images.map(i => i.decode())).then(() => {
+    images.forEach(img => gif.addFrame(img, { delay: state.frameDelay }));
+    gif.render();
+  });
+  // images.forEach(img => gif.addFrame(img, { delay: state.frameDelay }));
   gif.on("finished", function (blob) {
     console.info("gif completed");
     file.saveAs(blob, `${state.name}.gif`);
     // window.open(URL.createObjectURL(blob));
   });
   dom.listen(document, "FileSaved", evt => ui.stopSpinner());
-  gif.render();
 }
 
 function openSvg(evt) {
@@ -193,12 +201,17 @@ function saveAsSpritesheet() {
     height: height * frames.length,
   });
   let ctx = canvas.getContext("2d");
-  frames.forEach((frame, idx) => {
-    let img = ui.frameToImage(frame);
-    img.decode().then(() => ctx.drawImage(img, 0, height * idx));
+  let images = frames.map(f => ui.frameToImage(f));
+  console.log("images in saveAsSpritesheet: %o", images);
+  Promise.all(images.map(i => i.decode())).then(() => {
+    images.forEach((img, idx) => ctx.drawImage(img, 0, height * idx));
+    file.saveAs(canvas, `${state.name}.png`);
   });
+  // frames.forEach((frame, idx) => {
+  //   let img = ui.frameToImage(frame);
+  //   img.decode().then(() => ctx.drawImage(img, 0, height * idx));
+  // });
   dom.listen(document, "FileSaved", evt => ui.stopSpinner());
-  file.saveAs(canvas, `${state.name}.png`);
 }
 
 async function saveAsZip() {
@@ -329,8 +342,6 @@ function resize() {
   timeline.makeThumbnails();
 }
 
-requestAnimationFrame(render);
-
 // Key shortcuts: Command: ⌘
 //                Control: ⌃
 //                Shift:   ⇧
@@ -422,10 +433,10 @@ listen(window, "load", restoreLocal);
 listen(window, "resize", resize);
 
 // Frame events
-listen(document, "addFrame", evt => {
-  ui.currentFrame().appendChild(camera.svgSnapshot());
-});
 listen(document, "addFrame", evt => timeline.addThumbnail(evt.detail.frame));
+listen(document, "newThumb", evt =>
+  frames.goToFrame(ui.currentFrame(), evt.detail.frame)
+);
 listen(document, "removeFrame", evt =>
   timeline.removeThumbnail(evt.detail.frame)
 );

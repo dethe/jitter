@@ -7,6 +7,7 @@
 import state from "/jitter/js/state.js";
 import ui from "/jitter/js/ui.js";
 import * as dom from "/jitter/js/dom.js";
+import * as camera from "/jitter/js/camera.js";
 const { $, $$ } = dom;
 
 function updateOnionskin() {
@@ -30,8 +31,11 @@ function insertFrame(before, frame) {
 
 function addFrame() {
   let curr = ui.currentFrame();
-  let frame = insertFrame(curr, dom.svg("g", { class: "frame" }));
-  goToFrame(curr, frame);
+  let frame = insertFrame(
+    curr,
+    dom.svg("g", { class: "frame" }, [camera.svgSnapshot()])
+  );
+  // goToFrame(curr, frame);
   dom.sendEvent("addFrame", { frame });
 }
 

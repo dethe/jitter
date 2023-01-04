@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import ui from "/jitter/js/ui.js";
-import { $, $$, html } from "/jitter/js/dom.js";
+import { $, $$, html, sendEvent } from "/jitter/js/dom.js";
 
 function frameToThumbnail(frame) {
   // this is different from Shimmy because Frames in Jitter contain an SVG <image> rather than
@@ -29,9 +29,9 @@ function thumbnailForFrame(frame) {
   }
   let thumb = $(`#${frame.id}-canvas`);
   if (!thumb) {
-    thumb = frameToThumbnail(frame);
+    console.error("No thumb for frame %s", frame.id);
+    return;
   }
-
   return thumb;
 }
 
@@ -49,10 +49,6 @@ function makeThumbnails() {
   tl.innerHTML = ""; // remove any existing children
   $$(".frame").forEach(frame => {
     const thumb = frameToThumbnail(frame);
-    if (!thumb) {
-      console.error("No thumb for frame %s", frame.id);
-      return;
-    }
     tl.appendChild(html("div", [thumb]));
   });
   if (tl.children.length) {
@@ -83,7 +79,9 @@ function addThumbnail(frame) {
   }
   const newThumb = html("div", [frameToThumbnail(frame)]);
   $(".timeline-frames").insertBefore(newThumb, oldThumb);
-  newThumb.scrollIntoView();
+  // newThumb.scrollIntoView();
+  // send newThumb event, listen in script.js and go to frame
+  sendEvent("newThumb", { frame });
 }
 
 function removeThumbnail(frame) {

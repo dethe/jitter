@@ -76,33 +76,23 @@ class ui {
 
   static frameToImage(frame, targetHeight) {
     // if there is no targetHeight, could just create an HTML <img> and set it's src to the href of <image>
-    // console.log("frame %s: %s child nodes", frame.id, frame.children.length);
+    console.log("frame %s: %s child nodes", frame.id, frame.children.length);
     let img = frame.querySelector("image");
     if (!img) {
       console.error("No image for frame %s", frame.id);
       return null;
     }
-    let targetWidth;
     // SVG images width/height are animatable properties
     let imgWidth = img.width.baseVal.value;
     let imgHeight = img.height.baseVal.value;
-    if (targetHeight) {
-      targetWidth = Math.floor(imgWidth / (imgHeight / targetHeight));
-      // console.log(
-      //   "target height: %s, target width: %s, img: %o",
-      //   targetHeight,
-      //   targetWidth,
-      //   img
-      // );
-    } else {
+    if (!targetHeight) {
       return dom.html("img", {
         width: imgWidth,
         height: imgHeight,
         src: img.getAttribute("href"),
       });
-      targetHeight = imgHeight;
-      targetWidth = imgWidth;
     }
+    let targetWidth = Math.floor(imgWidth / (imgHeight / targetHeight));
     let c = html("canvas", {
       class: "canvas-frame ginger",
       id: frame.id + "-canvas",
