@@ -159,6 +159,9 @@ function addClass(elem, klass) {
 }
 
 function previous(elem, selector) {
+  if (!elem){
+    return null;
+  }
   let node = elem.previousElementSibling;
   while (node) {
     if (node.matches(selector)) {

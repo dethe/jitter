@@ -34,12 +34,17 @@ if ("serviceWorker" in navigator) {
 
 // Wrap `dom.listen` and `dom.addShortcuts` so that events don't trigger during animation playback
 
-const listen = (selector, event, listener) =>
+function listen(selector, event, listener) {
+  if (typeof listener !== "function") {
+    console.error("Expected function, received %s", typeof listener);
+  }
   dom.listen(selector, event, evt => {
     if (!state.playing) {
       listener(evt);
     }
   });
+}
+
 const addShortcuts = (shortcuts, fn, uxid, macHint, pcHint) =>
   dom.addShortcuts(
     shortcuts,
@@ -57,21 +62,7 @@ const addShortcuts = (shortcuts, fn, uxid, macHint, pcHint) =>
 window.ui = ui;
 window.state = state;
 
-const defaultDoc = `<svg id="doc" width="2560px" height="1116px" data-name="untitled"data-doonionskin="true" data-showvideo="true" data-fps="10" data-fileTab="false" data-framesTab="true"><g class="frame selected"></g></svg>`;
-
-function getSvgPoint(x, y) {
-  let point = $("svg").createSVGPoint();
-  point.x = x;
-  point.y = y;
-  return point;
-}
-
-// Prevent control clicks from passing through to svg
-function swallowClicks(evt) {
-  evt.stopPropagation();
-  // evt.preventDefault();
-}
-listen(".toolbar, .tabbar", ["mousedown", "touchstart"], swallowClicks);
+const defaultDoc = `<svg id="doc" width="2560px" height="1116px" data-name="untitled" data-doonionskin="true" data-showvideo="true" data-fps="10" data-filetab="false" data-framestab="true"></svg>`;
 
 let body = document.body;
 
@@ -87,8 +78,6 @@ function newAnimation(evt) {
   );
   if (forSure) {
     clear();
-    ui.updateFrameCount();
-    timeline.makeThumbnails();
   }
 }
 
@@ -97,14 +86,17 @@ function restoreFormat(savetext) {
     savetext = defaultDoc;
   }
   if (!ui.doc) {
+    console.warn("ui doc not found in restoreFormat, doc may be detached");
     ui.doc = dom.svg("svg");
   }
   ui.doc.outerHTML = savetext;
   ui.doc = $("#doc");
+  // console.log("ui doc re-established after restoring: %s", !!ui.doc);
   ui.updateFrameCount();
   dom.ensureIds(".frame");
   ui.resize();
   restoreSavedState();
+  // could clear thumbnails if there are no frames
   timeline.makeThumbnails();
 }
 
@@ -137,6 +129,11 @@ function saveFormat() {
     if (ui.doc.id === "canvas") {
       ui.doc.id = "doc";
     }
+    $$(doc, "g").forEach(g => {
+      if (!g.hasChildNodes()) {
+        g.remove();
+      }
+    });
     return ui.doc.outerHTML;
   } else {
     return "";
@@ -154,13 +151,6 @@ function saveAsSvg(evt) {
   file.save(saveFormat(), state.name);
 }
 
-function saveFrameAsPng(evt) {
-  // unused, add UI or delete
-  let { x, y, width, height } = ui.getAnimationBBox();
-  let img = frameToImage(ui.currentFrame(), x, y, width, height);
-  // FIXME: save the image
-}
-
 function saveAsGif(evt) {
   if (!state.name || state.name === "untitled") {
     state.name = prompt("Save SVG file as: ");
@@ -171,7 +161,7 @@ function saveAsGif(evt) {
     workers: 2,
     quality: 10,
     workerScript: "lib/gif.worker.js",
-    background: $("#bgcolor").value,
+    background: "#FFFFFF",
   });
   let images = ui.animationToImages();
   images.forEach(img => gif.addFrame(img, { delay: state.frameDelay }));
@@ -194,7 +184,9 @@ function saveAsSpritesheet() {
   }
   if (!state.name) return;
   ui.startSpinner();
-  let { x, y, width, height } = ui.getAnimationBBox();
+  // FIXME, these should not be hardcoded
+  let width = 640;
+  let height = 480;
   let frames = $$(".frame");
   let canvas = dom.html("canvas", {
     width: width,
@@ -202,7 +194,8 @@ function saveAsSpritesheet() {
   });
   let ctx = canvas.getContext("2d");
   frames.forEach((frame, idx) => {
-    ctx.drawImage(ui.frameToImage(frame, x, y, width, height), 0, height * idx);
+    let img = ui.frameToImage(frame);
+    img.decode().then(() => ctx.drawImage(img, 0, height * idx));
   });
   dom.listen(document, "FileSaved", evt => ui.stopSpinner());
   file.saveAs(canvas, `${state.name}.png`);
@@ -224,7 +217,8 @@ async function saveAsZip() {
     const frame = frames[idx];
     // add each frame to the zip as a PNG
     let blob = await new Promise(resolve =>
-      ui.frameToImage(frame, x, y, width, height).toBlob(blob => resolve(blob))
+      // FIXME, frame contains an image already, use that?
+      ui.frameToImage(frame).toBlob(blob => resolve(blob))
     );
     img.file(state.name + pad(idx) + ".png", blob, { base64: true });
   }
@@ -243,7 +237,10 @@ function updateSavedState() {
 }
 
 function restoreSavedState() {
-  state.keys.forEach(key => (state[key] = ui.doc.dataset[key]));
+  Object.keys(ui.doc.dataset).forEach(
+    key => (state[key] = ui.doc.dataset[key])
+  );
+  // state.keys.forEach(key => (state[key] = ui.doc.dataset[key]));
 }
 
 function keydownHandler(evt) {
@@ -403,10 +400,10 @@ listen("#framefirst", "click", frames.goToFirstFrame);
 listen("#frameprev", "click", frames.decrementFrame);
 listen("#framenext", "click", frames.incrementFrame);
 listen("#framelast", "click", frames.goToLastFrame);
-listen("#doonionskin", "change", state.toggleOnionskin);
-listen(".onionskin > i", "click", state.toggleOnionskin);
-listen("#doshowvideo", "change", state.toggleShowVideo);
-listen(".showvideo > i", "click", state.toggleShowVideo);
+listen("#doonionskin", "change", state.toggleonionskin);
+listen(".onionskin > i", "click", state.toggleonionskin);
+listen("#doshowvideo", "change", state.toggleshowvideo);
+listen(".showvideo > i", "click", state.toggleshowvideo);
 listen("#animateplay", "click", animation.play);
 listen("#framerate", "change", evt => (state.fps = evt.currentTarget.value));
 listen(".timeline-label", "click", timeline.toggleTimeline);

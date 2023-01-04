@@ -10,15 +10,21 @@ import * as dom from "/jitter/js/dom.js";
 const { $, $$ } = dom;
 
 function updateOnionskin() {
-  if (!state.doOnionskin) return;
   $$(".frame.onionskin").forEach(frame => frame.classList.remove("onionskin"));
-  dom.addClass(dom.previous(ui.currentFrame(), ".frame"), "onionskin");
+  if (!state.doonionskin) return;
+  let curr = ui.currentFrame();
+  if (curr) {
+    curr.classList.add("onionskin");
+  }
 }
 
 function insertFrame(before, frame) {
-  dom.insertAfter(frame, before);
+  if (before) {
+    dom.insertAfter(frame, before);
+  } else {
+    ui.doc.appendChild(frame);
+  }
   frame.id = dom.randomId();
-  dom.sendEvent("addFrame", { frame });
   return frame;
 }
 
@@ -26,6 +32,7 @@ function addFrame() {
   let curr = ui.currentFrame();
   let frame = insertFrame(curr, dom.svg("g", { class: "frame" }));
   goToFrame(curr, frame);
+  dom.sendEvent("addFrame", { frame });
 }
 
 function deleteFrame() {
@@ -52,14 +59,6 @@ function restore(frame, children, transform) {
   children.forEach(child => frame.appendChild(child));
   dom.sendEvent("updateFrame", { frame });
   return frame;
-}
-
-function clearFrame(frame) {
-  if (!frame) {
-    frame = ui.currentFrame();
-  }
-  dom.clear(frame);
-  dom.sendEvent("updateFrame", { frame });
 }
 
 function goToFrame(prev, next) {
@@ -111,7 +110,6 @@ function goToLastFrame() {
 window.goToFrame = goToFrame;
 
 export {
-  insertFrame,
   addFrame,
   deleteFrame,
   goToFrame,
