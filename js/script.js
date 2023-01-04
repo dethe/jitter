@@ -163,8 +163,11 @@ function saveAsGif(evt) {
     workerScript: "lib/gif.worker.js",
     background: "#FFFFFF",
   });
-  let images = ui.animationToImages();
-  images.forEach(img => gif.addFrame(img, { delay: state.frameDelay }));
+  let images = ui.animationToImages().map(i => i.decode());
+  Promise.all(images).then(imgs =>
+    imgs.forEach(img => gif.addFrame(img, { delay: state.frameDelay }))
+  );
+  // images.forEach(img => gif.addFrame(img, { delay: state.frameDelay }));
   gif.on("finished", function (blob) {
     console.info("gif completed");
     file.saveAs(blob, `${state.name}.gif`);
@@ -193,10 +196,13 @@ function saveAsSpritesheet() {
     height: height * frames.length,
   });
   let ctx = canvas.getContext("2d");
-  frames.forEach((frame, idx) => {
-    let img = ui.frameToImage(frame);
-    img.decode().then(() => ctx.drawImage(img, 0, height * idx));
-  });
+  Promise.all(frames.map(f => ui.frameToImage(f).decode())).then(images =>
+    images.forEach((img, idx) => ctx.drawImage(img, 0, height * idx))
+  );
+  // frames.forEach((frame, idx) => {
+  //   let img = ui.frameToImage(frame);
+  //   img.decode().then(() => ctx.drawImage(img, 0, height * idx));
+  // });
   dom.listen(document, "FileSaved", evt => ui.stopSpinner());
   file.saveAs(canvas, `${state.name}.png`);
 }
@@ -422,10 +428,10 @@ listen(window, "load", restoreLocal);
 listen(window, "resize", resize);
 
 // Frame events
-listen(document, "addFrame", evt => {
-  ui.currentFrame().appendChild(camera.svgSnapshot());
-});
 listen(document, "addFrame", evt => timeline.addThumbnail(evt.detail.frame));
+listen(document, "newThumb", evt =>
+  frames.goToFrame(ui.currentFrame(), evt.detail.frame)
+);
 listen(document, "removeFrame", evt =>
   timeline.removeThumbnail(evt.detail.frame)
 );
